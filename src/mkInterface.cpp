@@ -14,13 +14,16 @@
 #include "mraa.hpp"
 
 
+
 mraa::Gpio* gpio;
 
 
 mkInterface::mkInterface() {
 
-    response = 0;
-    on = 0;
+    response = 0;	// Initialize to no error
+    on = 0;			// Default to not on
+
+    iopin = 13;		// Default to onboard LED
 }
 
 

@@ -17,13 +17,15 @@
 #include "mkInterface.hpp"
 #include "mkTime.hpp"
 
+//#include "mraa.hpp"
+
 
 int defaultPin = 13;
 int running = 0;
 
 void sig_handler(int signo) {
     if (signo == SIGINT) {
-        printf("closing IO nicely\n");
+        printf("Closing IO nicely\n");
         running = -1;
     }
 }
@@ -50,11 +52,10 @@ int main (int argc, char **argv) {
     while (running == 0) {
     	if ( timeObj.getElapsedTime() > targetTime ) {
     		timeObj.startElapsedTime();
- //   		targetTime += 0.1;
- //   		if (targetTime > 10.0 ) {
- //       		targetTime = 0.1;
- //   		}
-
+    		targetTime += 0.5;
+    		if (targetTime > 10.0 ) {
+        		targetTime = 0.5;
+    		}
 
             ifObj.togglePin();
 

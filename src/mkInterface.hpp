@@ -11,7 +11,6 @@
 #define MKINTERFACE_HPP_
 
 
-
 class mkInterface {
 
 public:
