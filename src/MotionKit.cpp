@@ -25,7 +25,7 @@ int running = 0;
 
 void sig_handler(int signo) {
     if (signo == SIGINT) {
-        printf("Closing IO nicely\n");
+        printf("\nClosing IO nicely\n");
         running = -1;
     }
 }
@@ -34,17 +34,20 @@ void sig_handler(int signo) {
 int main (int argc, char **argv) {
 
 	if (argc < 2) {
-		fprintf(stdout, "\n\nProvide an int arg if you want to flash an LED on some other IO port than IO %d\n", defaultPin);
+		fprintf(stdout, "\nProvide an int arg if you want to flash an LED on some other IO port than IO %d\n", defaultPin);
     } else {
     	defaultPin = strtol(argv[1], NULL, 10);
     }
 
     signal(SIGINT, sig_handler);
 
-    double targetTime = 0.1;
+    double targetTime = 1.0;
 
     mkInterface ifObj;
-    ifObj.setupMRAA( defaultPin );
+//    ifObj.setupGPIO( defaultPin );
+    ifObj.setupADC( 0 );
+
+	fprintf(stdout, "\nMotionKit Version %.02f\n", 0.11);
 
     mkTime timeObj;
     timeObj.startElapsedTime();
@@ -52,12 +55,14 @@ int main (int argc, char **argv) {
     while (running == 0) {
     	if ( timeObj.getElapsedTime() > targetTime ) {
     		timeObj.startElapsedTime();
-    		targetTime += 0.5;
-    		if (targetTime > 10.0 ) {
-        		targetTime = 0.5;
-    		}
+//    		targetTime += 0.5;
+//    		if (targetTime > 10.0 ) {
+//        		targetTime = 0.5;
+//    		}
 
-            ifObj.togglePin();
+//            ifObj.togglePin();
+            int pinValue = ifObj.readPin();
+        	fprintf(stdout, "ADC A0 read %X - %d\n", pinValue, pinValue);
 
     	}
     }

@@ -7,8 +7,6 @@
 // Description : Base for MotionKit
 //============================================================================
 
-#include <stdio.h>
-
 #include "mkInterface.hpp"
 
 #include "mraa.hpp"
@@ -17,6 +15,8 @@
 
 mraa::Gpio* gpio;
 
+mraa::Aio* a0;
+
 
 mkInterface::mkInterface() {
 
@@ -24,6 +24,8 @@ mkInterface::mkInterface() {
     on = 0;			// Default to not on
 
     iopin = 13;		// Default to onboard LED
+
+    adc_value = 0;
 }
 
 
@@ -33,12 +35,12 @@ mkInterface::~mkInterface() {
     	delete gpio;
 
     mraa_deinit();
-    fprintf(stdout, "\nGoodbye mraa\n" );
+    fprintf(stdout, "\nGoodbye mraa\n\n" );
 
 }
 
 
-bool mkInterface::setupMRAA( int pinNumber ) {
+bool mkInterface::setupGPIO( int pinNumber ) {
 
     on = 0;
 
@@ -62,26 +64,40 @@ bool mkInterface::setupMRAA( int pinNumber ) {
 void mkInterface::togglePin() {
 
     response = gpio->write( on );
+    if (response != MRAA_SUCCESS) {
+        mraa_result_print((mraa_result_t) response);
+    }
     on = ( 0 == on ) ? 1 : 0;
 }
 
 
+void mkInterface::outputPin( int offOn ) {
 
-/*
-//	  adc input setup
-//    uint16_t adc_value;
-//    mraa::Aio* a0;
+    response = gpio->write( offOn );
+    if (response != MRAA_SUCCESS) {
+        mraa_result_print((mraa_result_t) response);
+    }
+}
 
-//    a0 = new mraa::Aio(0);
-//    if (!a0) {
-//        return MRAA_ERROR_UNSPECIFIED;
-//    }
 
-*/
+bool mkInterface::setupADC( int pinNumber ) {
 
-/*
-//			adc read
-//   		adc_value = a0->read();
-//   		fprintf(stdout, "ADC A0 read %X - %d\n", adc_value, adc_value);
+	//	adc input setup
+	a0 = new mraa::Aio( pinNumber );
+	if (!a0) {
+	    return MRAA_ERROR_UNSPECIFIED;
+	}
 
-*/
+	return MRAA_SUCCESS;
+}
+
+
+int mkInterface::readPin() {
+
+	//	adc read
+	adc_value = a0->read();
+
+	return adc_value;
+}
+
+// end of mkInterface.cpp

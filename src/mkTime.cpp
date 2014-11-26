@@ -14,6 +14,7 @@
 
 #include "mkTime.hpp"
 
+#define	CLOCK_RATE		500000
 
 //namespace mkit {
 

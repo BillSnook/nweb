@@ -10,6 +10,8 @@
 #ifndef MKINTERFACE_HPP_
 #define MKINTERFACE_HPP_
 
+#include <stdio.h>
+
 
 class mkInterface {
 
@@ -17,13 +19,19 @@ public:
 	mkInterface();
 	virtual ~mkInterface();
 
-	bool setupMRAA( int pinNumber );
+	bool setupGPIO( int pinNumber );
 	void togglePin();
+	void outputPin( int offOn );
+
+	bool setupADC( int pinNumber );
+	int readPin();		// 0 - 3FFh, 0 - 1023
 
 private:
     int response;
 	int iopin;
     int on;
+
+	int adc_value;
 
 };
 
