@@ -7,8 +7,8 @@
 // Description : Base for MotionKit
 //============================================================================
 
-#ifndef MKINTERFACE_HPP_
-#define MKINTERFACE_HPP_
+//#ifndef MKINTERFACE_HPP_
+//#define MKINTERFACE_HPP_
 
 #include <stdio.h>
 
@@ -36,4 +36,4 @@ private:
 };
 
 
-#endif /* MKINTERFACE_HPP_ */
+//#endif /* MKINTERFACE_HPP_ */

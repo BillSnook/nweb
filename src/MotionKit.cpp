@@ -17,7 +17,11 @@
 #include "mkInterface.hpp"
 #include "mkTime.hpp"
 
-//#include "mraa.hpp"
+
+int	adcMin = 0;
+int	adcMax = 1023;
+
+int	adcMid = 511;
 
 
 int defaultPin = 13;
@@ -41,10 +45,10 @@ int main (int argc, char **argv) {
 
     signal(SIGINT, sig_handler);
 
-    double targetTime = 1.0;
+    double targetTime = 1.0;	// Interval for ops in the loop
 
     mkInterface ifObj;
-//    ifObj.setupGPIO( defaultPin );
+    ifObj.setupGPIO( defaultPin );
     ifObj.setupADC( 0 );
 
 	fprintf(stdout, "\nMotionKit Version %.02f\n", 0.11);
@@ -60,10 +64,14 @@ int main (int argc, char **argv) {
 //        		targetTime = 0.5;
 //    		}
 
-//            ifObj.togglePin();
             int pinValue = ifObj.readPin();
         	fprintf(stdout, "ADC A0 read %X - %d\n", pinValue, pinValue);
 
+        	if ( pinValue > 511 ) {
+        		ifObj.outputPin( 1 );
+        	} else {
+        		ifObj.outputPin( 0 );
+        	}
     	}
     }
     return 0;
