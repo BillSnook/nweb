@@ -65,8 +65,7 @@ void nlog(int type, char *s1, char *s2, int num) {
 						break;
 	}
 
-	/* no checks here, nothing can be done a failure anyway */
-
+	// no checks here, nothing can be done a failure anyway
 	if((fd = open("nweb.log", O_CREAT| O_WRONLY | O_APPEND,0644)) >= 0) {
 		(void)write(fd,logbuffer,strlen(logbuffer));
 		(void)write(fd,"\n",1);
@@ -74,86 +73,97 @@ void nlog(int type, char *s1, char *s2, int num) {
 
 	}
 
-	if (type == ERROR || type == SORRY) exit(3);
+	if (type == ERROR || type == SORRY)
+		exit(3);
 
 }
 
 
 
-/* this is a child web server process, so we can exit on errors */
+// this is a child web server process, so we can exit on errors
 void web(int fd, int hit) {
 	int j, file_fd, buflen, len;
 	long i, ret;
-	char * fstr;
-	static char buffer[BUFSIZE+1]; /* static so zero filled */
+	char * fExtent;
+	static char buffer[BUFSIZE+1];				// static so zero filled
 
-	ret =read(fd,buffer,BUFSIZE);   /* read Web request in one go */
+	ret = read( fd, buffer, BUFSIZE );  		// read Web request in one go
 
-	if(ret == 0 || ret == -1) {     /* read failure stop now */
+	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 		nlog(SORRY,"failed to read browser request","",fd);
 	}
 
-	if(ret > 0 && ret < BUFSIZE)    /* return code is valid chars */
-		buffer[ret]=0;          	/* terminate the buffer */
+	if ( ( ret > 0 ) && ( ret < BUFSIZE ) )		// return code is valid chars
+		buffer[ret]=0;          				// terminate the buffer
 	else
 		buffer[0]=0;
 
-	for(i=0;i<ret;i++)      /* remove CF and LF characters */
-	if(buffer[i] == '\r' || buffer[i] == '\n')
-	buffer[i]='*';
+	for ( i=0; i<ret; i++ )      				// remove CF and LF characters
+		if ( ( buffer[i] =  '\r' ) || ( buffer[i] == '\n' ) )
+			buffer[i]='*';
 	nlog(LOG,"request",buffer,hit);
 
-	if( strncmp(buffer,"GET ",4) && strncmp(buffer,"get ",4) )
-		nlog(SORRY,"Only simple GET operation supported",buffer,fd);
+	// Sorta-valid header received
 
-	for (i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
+	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) )
+		nlog( SORRY, "Only simple GET operation supported", buffer, fd );
 
-		if(buffer[i] == ' ') { /* string is "GET URL " +lots of other stuff */
+	for ( i = 4; i < BUFSIZE; i++ ) {			// null terminate after the second space to ignore extra stuff
+		if ( buffer[i] == ' ' ) {				// string is "GET URL " +lots of other stuff
 			buffer[i] = 0;
 			break;
 		}
 	}
 
-	for(j=0;j<i-1;j++)      /* check for illegal parent directory use .. */
-		if (buffer[j] == '.' && buffer[j+1] == '.')
-			nlog(SORRY,"Parent directory (..) path names not supported",buffer,fd);
+	// Command parsed
 
-	if ( !strncmp(&buffer[0],"GET /\0",6) || !strncmp(&buffer[0], "get /\0",6) ) /* convert no filename to index file */
-		(void)strcpy(buffer,"GET /index.html");
+	for ( j = 0; j < i-1; j++ )						// check for illegal parent directory use ..
+		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) )
+			nlog( SORRY, "Parent directory (..) path names not supported", buffer, fd );
 
-	/* work out the file type and check we support it */
-	buflen=(int)strlen(buffer);
-	fstr = (char *)0;
+	// investigate file name
+//	char *filename = "";
 
-	for(i=0;extensions[i].ext != 0;i++) {
-		len = (int)strlen(extensions[i].ext);
-		if( !strncmp(&buffer[buflen-len], extensions[i].ext, len)) {
-			fstr =extensions[i].filetype;
+	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )		// convert no filename to index file
+		(void)strcpy( buffer, "GET /index.html" );
+
+	// work out the file type and check we support it
+	buflen = (int)strlen( buffer );
+	fExtent = (char *)0;
+
+	//
+	for ( i = 0; extensions[i].ext != 0; i++ ) {
+		len = (int)strlen( extensions[i].ext );
+		if ( !strncmp( &buffer[buflen-len], extensions[i].ext, len ) ) {
+			fExtent = extensions[i].filetype;
 			break;
 		}
 	}
 
-	if (fstr == 0)
-		nlog(SORRY,"file extension type not supported", buffer,fd);
+	if ( fExtent == 0 )
+		nlog( SORRY, "file extension type not supported", buffer, fd );
 
-		if(( file_fd = open(&buffer[5],O_RDONLY)) == -1) /* open the file for reading */
-			nlog(SORRY, "failed to open file",&buffer[5],fd);
+	// file name available, open it
 
-		nlog(LOG,"SEND",&buffer[5],hit);
+	if ( ( file_fd = open( &buffer[5], O_RDONLY ) ) == -1 )	// open the file for reading
+		nlog(SORRY, "failed to open file",  &buffer[5], fd );
 
-		(void)sprintf(buffer,"HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fstr);
-		(void)write(fd,buffer,strlen(buffer));
+	// Send
+	nlog( LOG, "SEND", &buffer[5], hit );
 
-		/* send file in 8KB block - last block may be smaller */
-		while ( (ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
-			(void)write(fd,buffer,ret);
-		}
+	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fExtent );
+	(void)write( fd, buffer, strlen( buffer ) );
+
+	// send file in 8KB block - last block may be smaller
+	while ( (ret = read(file_fd, buffer, BUFSIZE)) > 0 ) {
+		(void)write( fd, buffer, ret );
+	}
 
 #ifdef LINUX
-		sleep(1);       /* to allow socket to drain */
+	sleep( 1 );								//  to allow socket to drain
 #endif
 
-	exit(1);
+	exit  (1 );
 
 }
 
@@ -162,8 +172,8 @@ int main(int argc, char **argv) {
 	int i, port, pid, listenfd, socketfd, hit, bound;
 	size_t length;
 //	char *str;
-	static struct sockaddr_in cli_addr; /* static = initialised to zeros */
-	static struct sockaddr_in serv_addr; /* static = initialised to zeros */
+	static struct sockaddr_in cli_addr;		// static = initialised to zeros
+	static struct sockaddr_in serv_addr;	// static = initialised to zeros
 
 	if ( argc < 3 || argc > 3 || !strcmp(argv[1], "-?") ) {
 		(void)printf("hint: nweb Port-Number Top-Directory\n\n"
@@ -173,14 +183,14 @@ int main(int argc, char **argv) {
 					 "\tThere is no fancy features = safe and secure.\n\n"
 					 "\tExample: nweb 8181 /home/nwebdir &\n\n"
 					 "\tOnly Supports:");
-		for(i=0;extensions[i].ext != 0;i++)
-			(void)printf(" %s",extensions[i].ext);
+		for( i=0; extensions[i].ext != 0; i++ )
+			(void)printf(" %s",extensions[i].ext );
 
 		(void)printf("\n\tNot Supported: URLs including \"..\", Java, Javascript, CGI\n"
 						 "\tNot Supported: directories / /etc /bin /lib /tmp /usr /dev/sbin \n"
 						 "\tNo warranty given or implied\n\tNigel Griffiths nag@uk.ibm.com\n"
 						 );
-		exit(0);
+		exit( 0 );
 	}
 
 	if ( !strncmp(argv[2],"/"   ,2 ) || !strncmp(argv[2],"/etc", 5 ) ||
@@ -197,21 +207,21 @@ int main(int argc, char **argv) {
 		exit(4);
 	}
 
-	/* Become deamon + unstopable and no zombies children (= no wait()) */
+	// Become deamon + unstopable and no zombies children (= no wait())
 	if (fork() != 0)
-		return 0; /* parent returns OK to shell */
+		return 0;								// parent returns OK to shell
 
-	(void)signal(SIGCHLD, SIG_IGN); /* ignore child death */
-	(void)signal(SIGHUP, SIG_IGN); 	/* ignore terminal hangups */
+	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
+	(void)signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
 
 	for (i=0;i<32;i++)
-		(void)close(i);      		/* close open files */
+		(void)close(i);							// close open files
 
-	(void)setpgrp();             	/* break away from process group */
+	(void)setpgrp();							// break away from process group
 
 	nlog( LOG, "nweb starting", argv[1], getpid() );
 
-	/* setup the network socket */
+	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
 		nlog( ERROR, "system call", "socket", 0 );
 
@@ -238,10 +248,10 @@ int main(int argc, char **argv) {
 		if ((pid = fork()) < 0) {
 			nlog( ERROR, "system call", "fork", 0 );
 		} else {
-			if ( pid == 0 ) {  				/* child */
+			if ( pid == 0 ) {					// child
 				(void)close( listenfd );
-				web( socketfd, hit ); 		/* never returns */
-			} else {        				/* parent */
+				web( socketfd, hit );			// never returns
+			} else {        					// parent
 				(void)close( socketfd );
 			}
 		}
