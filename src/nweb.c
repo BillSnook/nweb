@@ -84,7 +84,7 @@ void nlog(int type, char *s1, char *s2, int num) {
 void web(int fd, int hit) {
 	int j, file_fd, buflen, len;
 	long i, ret;
-	char * fExtent;
+	char * fileType;
 	static char buffer[BUFSIZE+1];				// static so zero filled
 
 	ret = read( fd, buffer, BUFSIZE );  		// read Web request in one go
@@ -122,36 +122,35 @@ void web(int fd, int hit) {
 			nlog( SORRY, "Parent directory (..) path names not supported", buffer, fd );
 
 	// investigate file name
-//	char *filename = "";
+	char *fileName = &buffer[5];
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )		// convert no filename to index file
 		(void)strcpy( buffer, "GET /index.html" );
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );
-	fExtent = (char *)0;
+	fileType = (char *)0;
 
-	//
 	for ( i = 0; extensions[i].ext != 0; i++ ) {
 		len = (int)strlen( extensions[i].ext );
 		if ( !strncmp( &buffer[buflen-len], extensions[i].ext, len ) ) {
-			fExtent = extensions[i].filetype;
+			fileType = extensions[i].filetype;
 			break;
 		}
 	}
 
-	if ( fExtent == 0 )
+	if ( fileType == 0 )
 		nlog( SORRY, "file extension type not supported", buffer, fd );
 
 	// file name available, open it
 
-	if ( ( file_fd = open( &buffer[5], O_RDONLY ) ) == -1 )	// open the file for reading
-		nlog(SORRY, "failed to open file",  &buffer[5], fd );
+	if ( ( file_fd = open( fileName, O_RDONLY ) ) == -1 )	// open the file for reading
+		nlog(SORRY, "failed to open file",  fileName, fd );
 
 	// Send
-	nlog( LOG, "SEND", &buffer[5], hit );
+	nlog( LOG, "SEND", fileName, hit );
 
-	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fExtent );
+	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );
 	(void)write( fd, buffer, strlen( buffer ) );
 
 	// send file in 8KB block - last block may be smaller
