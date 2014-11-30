@@ -9,5 +9,8 @@
 #define NWTIME_HPP_
 
 
+void startElapsedTime();
+double getElapsedTime();
+
 
 #endif /* NWTIME_HPP_ */

@@ -45,6 +45,13 @@ struct {
 };
 
 
+//--	----	----	----	----	----	----	----
+
+
+int		running = 0;
+double	timeCheck;
+
+
 void nlog(int type, char *s1, char *s2, int num) {
 
 	int fd ;
@@ -167,8 +174,30 @@ void web(int fd, int hit) {
 }
 
 
-int doLoop() {
+void sig_handler(int signo) {
+    if (signo == SIGINT) {
+        printf("\nClosing IO nicely\n");
+        running = -1;
+    }
+}
 
+
+int doLoopProcess() {
+
+    signal(SIGINT, sig_handler);
+
+    double targetTime = 1.0;	// Interval for ops in the loop
+
+	fprintf(stdout, "\n  nweb/MotionKit Version %.02f\n", 0.1 );
+
+	startElapsedTime();
+    while ( running == 0 ) {
+    	if ( getElapsedTime() > timeCheck ) {
+    		startElapsedTime();
+        	fprintf(stdout, "\nTick\n" );
+
+    	}
+    }
 
 	return 0;
 }
@@ -207,7 +236,7 @@ int main(int argc, char **argv) {
 		exit(3);
 	}
 
-	if (chdir(argv[2]) == -1) {
+	if ( chdir(argv[2]) == -1 ) {
 		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
 		exit(4);
 	}
@@ -218,7 +247,7 @@ int main(int argc, char **argv) {
 	} else {
 		if ( pid > 0 ) {						// parent
 			// become loop manager
-			doLoop();
+			doLoopProcess();
 			return 0;							// parent returns OK to shell
 		}
 	}
