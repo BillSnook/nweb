@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 
 #include "../utilities/nwTime.h"
+#include "../utilities/nwInterface.h"
 
 
 #define BUFSIZE 8096
@@ -82,6 +83,39 @@ void nlog(int type, char *s1, char *s2, int num) {
 
 }
 
+
+
+void sig_handler(int signo) {
+    if (signo == SIGINT) {
+        printf("\nClosing IO nicely\n");
+        running = -1;
+    }
+}
+
+
+int doLoopProcess() {
+
+    signal(SIGINT, sig_handler);
+
+    double timeCheck = 1.0;	// Interval for ops in the loop
+
+	fprintf(stdout, "\n  nweb/MotionKit Version %.02f, starting loop process\n", 0.11 );
+
+	setupGPIO( 13 );
+
+	startElapsedTime();
+    while ( running == 0 ) {
+    	if ( getElapsedTime() > timeCheck ) {
+    		startElapsedTime();
+//        	fprintf(stdout, "\nTick\n" );
+
+    		togglePin();
+
+    	}
+    }
+
+	return 0;
+}
 
 
 // this is a child web server process, so we can exit on errors
@@ -174,35 +208,6 @@ void web(int fd, int hit) {
 }
 
 
-void sig_handler(int signo) {
-    if (signo == SIGINT) {
-        printf("\nClosing IO nicely\n");
-        running = -1;
-    }
-}
-
-
-int doLoopProcess() {
-
-    signal(SIGINT, sig_handler);
-
-    double targetTime = 1.0;	// Interval for ops in the loop
-
-	fprintf(stdout, "\n  nweb/MotionKit Version %.02f\n", 0.1 );
-
-	startElapsedTime();
-    while ( running == 0 ) {
-    	if ( getElapsedTime() > timeCheck ) {
-    		startElapsedTime();
-        	fprintf(stdout, "\nTick\n" );
-
-    	}
-    }
-
-	return 0;
-}
-
-
 int main(int argc, char **argv) {
 	int i, port, pid, listenfd, socketfd, hit, bound;
 	size_t length;
@@ -246,8 +251,7 @@ int main(int argc, char **argv) {
 		nlog( ERROR, "system call", "fork", 0 );
 	} else {
 		if ( pid > 0 ) {						// parent
-			// become loop manager
-			doLoopProcess();
+			doLoopProcess();					// become loop manager
 			return 0;							// parent returns OK to shell
 		}
 	}
@@ -281,6 +285,8 @@ int main(int argc, char **argv) {
 
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
+
+	fprintf(stdout, "\n  Starting web server process %.02f\n", 0.11 );
 
 	for ( hit = 1; ; hit++ ) {
 		length = sizeof( cli_addr );
