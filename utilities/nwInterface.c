@@ -20,6 +20,8 @@ mraa_gpio_context gpio;
 
 int setupGPIO( int pinNumber ) {
 
+	mraa_init();
+
     on = 0;
 
     iopin = pinNumber;
