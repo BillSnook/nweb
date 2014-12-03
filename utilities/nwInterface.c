@@ -22,27 +22,28 @@ int setupGPIO( int pinNumber ) {
 
 	mraa_init();
 
+    fprintf( stdout, "\nHello mraa\n" );
+    fprintf( stdout, "  Version: %s\n", mraa_get_version() );
+
+    mraa_platform_t platform = mraa_get_platform_type();
+    fprintf( stdout, "  Platform type: %d\n", platform );
+
     on = 0;
 
     iopin = pinNumber;
 
     gpio = mraa_gpio_init( iopin );
     if ( ! gpio ) {
-        fprintf( stdout, "\n  Failed initing gpio\n" );
+        fprintf( stdout, "  Failed initing gpio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
     } else {
-        fprintf( stdout, "\n  Inited gpio: %p\n", gpio );
+        fprintf( stdout, "  Inited gpio: %p\n", gpio );
     }
-
-    fprintf( stdout, "\nHello mraa\n  Version: %s", mraa_get_version() );
-
-    mraa_platform_t platform = mraa_get_platform_type();
-    fprintf( stdout, "\n  Platform type: %d\n", platform );
 
     response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
     if (response != MRAA_SUCCESS) {
-        fprintf( stdout, "\n  Failed setting gpio pin direction\n" );
+        fprintf( stdout, "  Failed setting gpio pin direction\n" );
         mraa_result_print((mraa_result_t) response);
         return 0;
     }
@@ -68,4 +69,11 @@ void outputPin( int offOn ) {
     if (response != MRAA_SUCCESS) {
         mraa_result_print((mraa_result_t) response);
     }
+}
+
+
+
+int closeGPIO( void ) {
+
+	mraa_deinit();
 }

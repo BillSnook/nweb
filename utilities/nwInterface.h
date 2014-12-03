@@ -15,6 +15,7 @@
 int setupGPIO( int pinNumber );
 void togglePin();
 void outputPin( int offOn );
+int closeGPIO( void );
 
 
 

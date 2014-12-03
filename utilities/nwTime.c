@@ -14,6 +14,7 @@
 #include <time.h>
 
 #include "nwTime.h"
+#include "mraa.h"
 
 
 #define	CLOCK_RATE		500000
