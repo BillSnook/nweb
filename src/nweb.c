@@ -22,18 +22,18 @@
 //#include <semaphore.h>
 
 
-// This uses threads instead of forks to handle web responses
-// Local loops are always threaded
-#define	USE_THREADS
-
 // This uses fork to create a new untethered process, then halts and returns to the command line
 // Otherwise if disabled, the program continues and we get printf output for debugging
 // So, off for debugging, on to run as daemon in background
 //#define	BECOME_ZOMBIE
 
 
-// Enable to use i/o code on Arduino breakout board, disable to run on Edison breakout board
-//#define	ENABLE_IO
+// This enables our new html control protocols
+#define	NEW_CONTROLS
+
+
+// Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
+#define	ENABLE_IO
 
 #include "../utilities/nwTime.h"
 
@@ -43,7 +43,8 @@
 
 
 
-#define	VERSION		12
+#define	VERSION		0
+#define	SUB_VERSION	15
 #define BUFSIZE		8096
 #define ERROR		42
 //#define SORRY 43
@@ -127,11 +128,7 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 	if ( type == ERROR )
 		exit( 3 );
 	if ( ( type == FORBIDDEN ) || ( type = NOTFOUND ) ) {
-#ifdef	USE_THREADS
-		pthread_exit( NULL );
-#else	// USE_THREADS
-		exit( 3 );
-#endif	// USE_THREADS
+//		pthread_exit( NULL );
 	}
 
 }
@@ -151,11 +148,16 @@ void *doLoopProcess( void *arg ) {
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
-	fprintf(stdout, "\n\n    nweb/MotionKit Version %d, starting loop process\n", VERSION );
+	fprintf(stdout, "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
     signal(SIGINT, sig_handler);
 
-    double timeCheck = 10.0;	// Interval for ops in the loop
+    double timeCheck;	// Interval for ops in the loop
+#ifdef	ENABLE_IO
+    timeCheck = 1.0;	// Interval for blink
+#else	// ENABLE_IO
+    timeCheck = 10.0;	// Interval for tick output
+#endif	// ENABLE_IO
 
 #ifdef	ENABLE_IO
 	setupGPIO( 13 );
@@ -190,38 +192,31 @@ void *doLoopProcess( void *arg ) {
 
 // this is a web server thread, so we can pthread_exit on errors
 void *web( void *arg ) {
-	int j, file_fd, buflen, len;
-	long i, ret;
-	char * fileType;
+	long i, j, ret;
 	static char buffer[BUFSIZE+1];				// static so zero filled
-	static char filePath[256];					// static so zero filled
 
-	fprintf(stdout, " web at start\n" );
+	fprintf(stdout, " got html request to handle\n" );
 
 //	pthread_detach( pthread_self() );
 
-	struct web_data *webData = arg;
-#ifndef	USE_THREADS
-	(void)close( webData->listener );	// if forking, we are child, we need to close listener socket
-#endif	// USE_THREADS
+	struct web_data *webData = arg;				// extract web params to local struct
 
-	ret = read( webData->sender, buffer, BUFSIZE );  		// read Web request in one go
+	ret = read( webData->sender, buffer, BUFSIZE );  // read Web request in one go
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 		nlog( FORBIDDEN, "failed to read browser request","", webData->sender );
 	}
 
 	if ( ( ret > 0 ) && ( ret < BUFSIZE ) )		// return code is valid chars
-		buffer[ret] = 0;          				// terminate the buffer
+		buffer[ret] = 0;          				// terminate the buffer - make it a valid c-string
 	else
 		buffer[0] = 0;
 
-	(void)printf( " before request\n" );
-//	nlog( LOG, "request", buffer, webData->hit);
+//	(void)printf( " before cr/lf scrub\n" );
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
 			buffer[i] = '*';
-	(void)printf( " after request and scrub\n" );
+//	(void)printf( " after cr/lf scrub\n" );
 
 	// Sorta-valid header received
 
@@ -229,6 +224,7 @@ void *web( void *arg ) {
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, webData->sender );
 	}
 
+	// extract uri
 	for ( i = 4; i < BUFSIZE; i++ ) {			// null terminate after the second space to ignore extra stuff
 		if ( buffer[i] == ' ' ) {				// string is "GET URL " + lots of other stuff
 			buffer[i] = 0;
@@ -239,13 +235,47 @@ void *web( void *arg ) {
 	// Command parsed
 	(void)printf( " got request for %s\n", &buffer[4] );
 
-	for ( j = 0; j < i-1; j++ )						// check for illegal parent directory use ..
+	for ( j = 4; j < i-1; j++ )						// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, webData->sender );
 		}
 
-	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )		// convert missing filename to index file
-		(void)strcpy( buffer, "GET /index.html" );
+#ifdef	NEW_CONTROLS
+
+//	This variant extracts the string from the GET message
+//	It then tries to validate the command and then to execute it
+
+	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri - special case
+//		(void)strcpy( buffer, "GET /index.html" );										// default to index file
+		// Set default command
+	}
+
+//	(void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
+//	(void)write( webData->sender, buffer, strlen( buffer ) );
+
+	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" );	// Shorter version, length not needed
+	(void)write( webData->sender, buffer, strlen( buffer ) );
+
+	// send response data, hopefully in html format
+
+	(void)sprintf( buffer, "<html><head>\r\n<title>Edison Web Server</title>\r\n</head><body>\r\n<h1>Edison return data</h1>\r\nThe data would show here.\r\n</body></html>\r\n" );
+	(void)write( webData->sender, buffer, strlen( buffer ) );
+
+
+
+	(void)printf( " done sending\n" );
+
+
+#else	// NEW_CONTROLS
+
+	int file_fd, buflen, len;
+	char * fileType;
+	static char filePath[256];					// static so zero filled
+
+//	This variant extracts the uri from the GET message
+
+	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )	// check for missing uri
+		(void)strcpy( buffer, "GET /index.html" );										// default to index file
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );
@@ -267,20 +297,19 @@ void *web( void *arg ) {
 	(void)printf( " got filePath: %s\n", filePath );
 
 	// validate the filePath string to determine what to return - default is file at URI path
-	//
 	if ( ( file_fd = open( filePath, O_RDONLY ) ) == -1 ) {		// open the file for reading
 		nlog(NOTFOUND, "failed to open file",  filePath, webData->sender );
 	}
 
 	// Send response - only one for now
 //	nlog( LOG, "SEND", filePath, webData->hit );
-	len = (long)lseek( file_fd, (off_t)0, SEEK_END );				// lseek to the file end to find the length
+	len = (long)lseek( file_fd, (off_t)0, SEEK_END );			// lseek to the file end to find the length
 	(void)lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
-    (void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.0\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, (long)len, fileType ); // Header + a blank line
+    (void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //	nlog( LOG, "Header", buffer, webData->hit );
 	(void)write( webData->sender, buffer, strlen( buffer ) );
 
-//	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );
+//	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// Shorter version, length not needed
 //	(void)write( webData->sender, buffer, strlen( buffer ) );
 
 	// send file in 8KB block - last block may be smaller
@@ -289,26 +318,21 @@ void *web( void *arg ) {
 	}
 	(void)printf( " done sending\n" );
 
+#endif	// NEW_CONTROLS
+
 //	sleep( 1 );
 
 	(void)close( webData->sender );
-#ifdef	USE_THREADS
+
 	pthread_exit( NULL );
-#else	// USE_THREADS
-	exit( 1 );
-#endif	// USE_THREADS
 }
 
 
 int main(int argc, char **argv) {
 	int i, port, listenfd, socketfd, hit, bound;
-#ifdef	USE_THREADS
 #ifdef	BECOME_ZOMBIE
 	int pid;
 #endif	// BECOME_ZOMBIE
-#else	// USE_THREADS
-	int pid;
-#endif	// USE_THREADS
 	size_t length;
 //	char *str;
 	static struct sockaddr_in cli_addr;		// static = initialised to zeros
@@ -365,12 +389,9 @@ int main(int argc, char **argv) {
 #endif	// BECOME_ZOMBIE
 
 
-#ifndef	USE_THREADS
-
-	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
+//	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
 	(void)signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
 
-#endif	// USE_THREADS
 
 	// we want to start a new thread to monitor our timed processes - like 'blink'
 	pthread_t pThread;	// this is our thread identifier
@@ -403,7 +424,7 @@ int main(int argc, char **argv) {
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-	fprintf(stdout, "\nStarting web server process %d\n\n", VERSION );
+	fprintf(stdout, "\nStarting web server process\n\n" );
 
 	for ( hit = 1; ; hit++ ) {
 		length = sizeof( cli_addr );
@@ -417,24 +438,11 @@ int main(int argc, char **argv) {
 		webData.sender = socketfd;
 		webData.hit = hit;
 
-#ifdef	USE_THREADS
 		int result = pthread_create( &pThread, NULL, web, &webData );
 		if ( 0 != result ) {
 			nlog( ERROR, "system call", "pthread_create", 0 );
 			exit( 5 );								// parent returns failure to shell
 		}
-#else	// USE_THREADS
-
-		if ((pid = fork()) < 0) {
-			nlog( ERROR, "system call", "fork", 0 );
-		} else {
-			if ( pid == 0 ) {					// child
-				web( &webData );			// never returns
-			} else {        					// parent
-				(void)close( socketfd );
-			}
-		}
-#endif	// USE_THREADS
 	}
 }
 
