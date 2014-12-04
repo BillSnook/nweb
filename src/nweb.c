@@ -33,7 +33,7 @@
 
 
 // Enable to use i/o code on Arduino breakout board, disable to run on Edison breakout board
-#define	ENABLE_IO
+//#define	ENABLE_IO
 
 #include "../utilities/nwTime.h"
 
@@ -62,6 +62,7 @@ struct {
 	{"jpeg","image/jpeg"},
 	{"png", "image/png" },
 	{"ico", "image/ico" },
+	{"js",  "application/x-javascript" },
 	{"zip", "image/zip" },
 	{"gz",  "image/gz"  },
 	{"tar", "image/tar" },
@@ -82,6 +83,7 @@ struct web_data {
 
 int		running = 0;
 //double	timeCheck;
+char	*baseDirectory;
 
 
 void nlog(int type, char *s1, char *s2, int socket_fd) {
@@ -137,7 +139,7 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 
 void sig_handler(int signo) {
     if (signo == SIGINT) {
-        printf("\nClosing IO nicely\n");
+        printf("\n        Closing IO nicely\n\n");
         running = -1;
     }
 }
@@ -149,11 +151,11 @@ void *doLoopProcess( void *arg ) {
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
-	fprintf(stdout, "\n\nnweb/MotionKit Version %d, starting loop process\n", VERSION );
+	fprintf(stdout, "\n\n    nweb/MotionKit Version %d, starting loop process\n", VERSION );
 
     signal(SIGINT, sig_handler);
 
-    double timeCheck = 1.0;	// Interval for ops in the loop
+    double timeCheck = 10.0;	// Interval for ops in the loop
 
 #ifdef	ENABLE_IO
 	setupGPIO( 13 );
@@ -167,7 +169,7 @@ void *doLoopProcess( void *arg ) {
 #ifdef	ENABLE_IO
     		togglePin();
 #else	// ENABLE_IO
-        	fprintf(stdout, "\nTick\n" );
+        	fprintf(stdout, "\n    Tick\n" );
 #endif	// ENABLE_IO
 
     	}
@@ -192,8 +194,9 @@ void *web( void *arg ) {
 	long i, ret;
 	char * fileType;
 	static char buffer[BUFSIZE+1];				// static so zero filled
+	static char filePath[256];					// static so zero filled
 
-	(void)printf( "printf in web\n" );
+	fprintf(stdout, " web at start\n" );
 
 //	pthread_detach( pthread_self() );
 
@@ -213,12 +216,12 @@ void *web( void *arg ) {
 	else
 		buffer[0] = 0;
 
-	(void)printf( "Before request\n" );
-	nlog( LOG, "request", buffer, webData->hit);
+	(void)printf( " before request\n" );
+//	nlog( LOG, "request", buffer, webData->hit);
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
 			buffer[i] = '*';
-	(void)printf( "After request and scrub\n" );
+	(void)printf( " after request and scrub\n" );
 
 	// Sorta-valid header received
 
@@ -234,7 +237,7 @@ void *web( void *arg ) {
 	}
 
 	// Command parsed
-	(void)printf( "Got request: %s\n", &buffer[4] );
+	(void)printf( " got request for %s\n", &buffer[4] );
 
 	for ( j = 0; j < i-1; j++ )						// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
@@ -260,30 +263,33 @@ void *web( void *arg ) {
 	}
 
 	// investigate file name, handle it
-	char *fileName = &buffer[5];
-	(void)printf( "Got request: %s\n", fileName );
+	sprintf( filePath, "%s/%s", baseDirectory, &buffer[5]);
+	(void)printf( " got filePath: %s\n", filePath );
 
-	// validate the fileName string to determine what to return - default is file at URI path
+	// validate the filePath string to determine what to return - default is file at URI path
 	//
-	if ( ( file_fd = open( fileName, O_RDONLY ) ) == -1 ) {		// open the file for reading
-		nlog(NOTFOUND, "failed to open file",  fileName, webData->sender );
+	if ( ( file_fd = open( filePath, O_RDONLY ) ) == -1 ) {		// open the file for reading
+		nlog(NOTFOUND, "failed to open file",  filePath, webData->sender );
 	}
 
 	// Send response - only one for now
-	nlog( LOG, "SEND", fileName, webData->hit );
+//	nlog( LOG, "SEND", filePath, webData->hit );
 	len = (long)lseek( file_fd, (off_t)0, SEEK_END );				// lseek to the file end to find the length
 	(void)lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
-    (void)sprintf( buffer, "HTTP/1.1 200 OK\nServer: nweb/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: %s\n\n", VERSION, (long)len, fileType ); // Header + a blank line
-	nlog( LOG, "Header", buffer, webData->hit );
+    (void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.0\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, (long)len, fileType ); // Header + a blank line
+//	nlog( LOG, "Header", buffer, webData->hit );
 	(void)write( webData->sender, buffer, strlen( buffer ) );
 
-	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );
-	(void)write( webData->sender, buffer, strlen( buffer ) );
+//	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );
+//	(void)write( webData->sender, buffer, strlen( buffer ) );
 
 	// send file in 8KB block - last block may be smaller
 	while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {
 		(void)write( webData->sender, buffer, ret );
 	}
+	(void)printf( " done sending\n" );
+
+//	sleep( 1 );
 
 	(void)close( webData->sender );
 #ifdef	USE_THREADS
@@ -338,6 +344,9 @@ int main(int argc, char **argv) {
 		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
 		exit(4);
 	}
+
+	baseDirectory = argv[2];
+
 #ifdef	BECOME_ZOMBIE
 	// Create daemon + unstoppable and no zombie children (= no wait())
 	if ((pid = fork()) < 0) {
@@ -394,12 +403,14 @@ int main(int argc, char **argv) {
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-	fprintf(stdout, "\n  Starting web server process %d\n", VERSION );
+	fprintf(stdout, "\nStarting web server process %d\n\n", VERSION );
 
 	for ( hit = 1; ; hit++ ) {
 		length = sizeof( cli_addr );
+		fprintf(stdout, "Before\n" );
 		if ( ( socketfd = accept( listenfd, (struct sockaddr *)&cli_addr, &length) ) < 0 )
 			nlog( ERROR, "system call", "accept", 0 );
+		fprintf(stdout, " After\n" );
 
 		struct web_data webData;
 		webData.listener = listenfd;
