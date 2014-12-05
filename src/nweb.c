@@ -33,7 +33,7 @@
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
-#define	ENABLE_IO
+//#define	ENABLE_IO
 
 #include "../utilities/nwTime.h"
 
@@ -52,6 +52,11 @@
 #define FORBIDDEN	403
 #define NOTFOUND	404
 
+#ifdef	ENABLE_IO
+#define	DEFAULT_LOOP_TIME	1.0
+#else	// ENABLE_IO
+#define	DEFAULT_LOOP_TIME	10.0
+#endif	// ENABLE_IO
 
 
 struct {
@@ -85,6 +90,14 @@ struct web_data {
 int		running = 0;
 //double	timeCheck;
 char	*baseDirectory;
+
+static char command[BUFSIZE+1];				// static so zero filled
+
+static char *html_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
+static char *html_head = "<html><head>\r\n<title>Edison Web Server</title>\r\n</head><body>\r\n";
+static char *html_foot = "\r\n</body></html\r\n>";
+
+//--	----	----	----	----	----	----	----
 
 
 void nlog(int type, char *s1, char *s2, int socket_fd) {
@@ -142,9 +155,29 @@ void sig_handler(int signo) {
 }
 
 
-void *doLoopProcess( void *arg ) {
+void *monitorUserOps( void *arg ) {
 
-//	(void)printf( "printf in doLoopProcess\n" );
+//	(void)printf( "printf in monitorUserOps\n" );
+//	char *msg = arg;
+//	fprintf(stdout, msg );
+
+	while ( 1 ) {
+		scanf( "%s", command );
+		printf( "\n\nGot command: %s\n\n", command );
+
+		if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program
+//			pthread_exit( NULL );					// Kill thread
+			exit( 1 );								// Or kill program
+		}
+	}
+
+	return NULL;
+}
+
+
+void *monitorTimeOps( void *arg ) {
+
+//	(void)printf( "printf in monitorTimeOps\n" );
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
@@ -152,12 +185,7 @@ void *doLoopProcess( void *arg ) {
 
     signal(SIGINT, sig_handler);
 
-    double timeCheck;	// Interval for ops in the loop
-#ifdef	ENABLE_IO
-    timeCheck = 1.0;	// Interval for blink
-#else	// ENABLE_IO
-    timeCheck = 10.0;	// Interval for tick output
-#endif	// ENABLE_IO
+    double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifdef	ENABLE_IO
 	setupGPIO( 13 );
@@ -187,6 +215,7 @@ void *doLoopProcess( void *arg ) {
 //#else	// USE_THREADS
 	exit( 1 );						// Exit program when told to quit via cntl-C
 //#endif	// USE_THREADS
+	return NULL;
 }
 
 
@@ -253,12 +282,15 @@ void *web( void *arg ) {
 //	(void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //	(void)write( webData->sender, buffer, strlen( buffer ) );
 
-	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" );	// Shorter version, length not needed
+	(void)sprintf( buffer, html_header );	// Shorter version, length not needed
 	(void)write( webData->sender, buffer, strlen( buffer ) );
 
 	// send response data, hopefully in html format
 
-	(void)sprintf( buffer, "<html><head>\r\n<title>Edison Web Server</title>\r\n</head><body>\r\n<h1>Edison return data</h1>\r\nThe data would show here.\r\n</body></html>\r\n" );
+	int sz = sprintf( buffer, html_head );
+	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\nThe data would show here: " );
+	sz += sprintf( &buffer[sz], command );
+	sz += sprintf( &buffer[sz], html_foot );
 	(void)write( webData->sender, buffer, strlen( buffer ) );
 
 
@@ -330,9 +362,6 @@ void *web( void *arg ) {
 
 int main(int argc, char **argv) {
 	int i, port, listenfd, socketfd, hit, bound;
-#ifdef	BECOME_ZOMBIE
-	int pid;
-#endif	// BECOME_ZOMBIE
 	size_t length;
 //	char *str;
 	static struct sockaddr_in cli_addr;		// static = initialised to zeros
@@ -373,6 +402,7 @@ int main(int argc, char **argv) {
 
 #ifdef	BECOME_ZOMBIE
 	// Create daemon + unstoppable and no zombie children (= no wait())
+	int pid;
 	if ((pid = fork()) < 0) {
 		nlog( ERROR, "system call", "fork", 0 );
 	} else {
@@ -393,12 +423,21 @@ int main(int argc, char **argv) {
 	(void)signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
 
 
+	// we want to start a new thread to monitor our user input processes
+	pthread_t pThreadUser;	// this is our thread identifier
+	int resultUser = pthread_create( &pThreadUser, NULL, monitorUserOps, "param1" );
+	if ( 0 != resultUser ) {
+		(void)printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 1", 0 );
+//		exit( 5 );								// parent returns failure to shell
+	}
+
 	// we want to start a new thread to monitor our timed processes - like 'blink'
-	pthread_t pThread;	// this is our thread identifier
-	int result = pthread_create( &pThread, NULL, doLoopProcess, "param1" );
-	if ( 0 != result ) {
-		(void)printf( "\n\npthread_create error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create", 0 );
+	pthread_t pThreadTime;	// this is our thread identifier
+	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param2" );
+	if ( 0 != resultTime ) {
+		(void)printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 1", 0 );
 //		exit( 5 );								// parent returns failure to shell
 	}
 
@@ -426,6 +465,7 @@ int main(int argc, char **argv) {
 
 	fprintf(stdout, "\nStarting web server process\n\n" );
 
+	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {
 		length = sizeof( cli_addr );
 		fprintf(stdout, "Before\n" );

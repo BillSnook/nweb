@@ -73,7 +73,7 @@ void outputPin( int offOn ) {
 
 
 
-int closeGPIO( void ) {
+void closeGPIO( void ) {
 
 	mraa_deinit();
 }
