@@ -35,6 +35,7 @@
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
 //#define	ENABLE_IO
 
+#include "userLoop.h"
 #include "../utilities/nwTime.h"
 
 #ifdef	ENABLE_IO
@@ -91,11 +92,10 @@ int		running = 0;
 //double	timeCheck;
 char	*baseDirectory;
 
-static char command[BUFSIZE+1];				// static so zero filled
-
 static char *html_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
 static char *html_head = "<html><head>\r\n<title>Edison Web Server</title>\r\n</head><body>\r\n";
 static char *html_foot = "\r\n</body></html\r\n>";
+
 
 //--	----	----	----	----	----	----	----
 
@@ -155,26 +155,6 @@ void sig_handler(int signo) {
 }
 
 
-void *monitorUserOps( void *arg ) {
-
-//	(void)printf( "printf in monitorUserOps\n" );
-//	char *msg = arg;
-//	fprintf(stdout, msg );
-
-	while ( 1 ) {
-		scanf( "%s", command );
-		printf( "\n\nGot command: %s\n\n", command );
-
-		if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program
-//			pthread_exit( NULL );					// Kill thread
-			exit( 1 );								// Or kill program
-		}
-	}
-
-	return NULL;
-}
-
-
 void *monitorTimeOps( void *arg ) {
 
 //	(void)printf( "printf in monitorTimeOps\n" );
@@ -223,6 +203,8 @@ void *monitorTimeOps( void *arg ) {
 void *web( void *arg ) {
 	long i, j, ret;
 	static char buffer[BUFSIZE+1];				// static so zero filled
+	extern char command[];
+
 
 	fprintf(stdout, " got html request to handle\n" );
 
@@ -295,7 +277,7 @@ void *web( void *arg ) {
 
 
 
-	(void)printf( " done sending\n" );
+	(void)printf( " done sending, command: %s\n", command );
 
 
 #else	// NEW_CONTROLS
