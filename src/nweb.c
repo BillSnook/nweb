@@ -28,7 +28,7 @@
 //#define	BECOME_ZOMBIE
 
 
-// This enables our new html control protocols
+// This enables our new html control protocols (vs. html file display method)
 #define	NEW_CONTROLS
 
 
@@ -36,11 +36,8 @@
 #include "timeLoop.h"
 
 
-#define	VERSION		0
-#define	SUB_VERSION	15
 #define BUFSIZE		8096
 #define ERROR		42
-//#define SORRY 43
 #define LOG			44
 #define FORBIDDEN	403
 #define NOTFOUND	404
@@ -131,12 +128,11 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 }
 
 
-// this is a web server thread, so we can pthread_exit on errors
+// this is a web server thread, so we can log and pthread_exit on errors
 void *web( void *arg ) {
 	long i, j, ret;
-	static char buffer[BUFSIZE+1];				// static so zero filled
-	extern char command[];
-
+	char buffer[BUFSIZE+1];
+	extern char command[];	// Access commands entered from the command line
 
 	fprintf(stdout, " got html request to handle\n" );
 
@@ -159,15 +155,13 @@ void *web( void *arg ) {
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
 			buffer[i] = '*';
-//	(void)printf( " after cr/lf scrub\n" );
 
-	// Sorta-valid header received
-
+	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, webData->sender );
 	}
 
-	// extract uri
+	// extract uri by terminating string
 	for ( i = 4; i < BUFSIZE; i++ ) {			// null terminate after the second space to ignore extra stuff
 		if ( buffer[i] == ' ' ) {				// string is "GET URL " + lots of other stuff
 			buffer[i] = 0;
@@ -185,12 +179,11 @@ void *web( void *arg ) {
 
 #ifdef	NEW_CONTROLS
 
-//	This variant extracts the string from the GET message
-//	It then tries to validate the command and then to execute it
+//	This variant extracts a string from the GET message
+//	It then tries to validate the string as a command and then to execute it
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri - special case
-//		(void)strcpy( buffer, "GET /index.html" );										// default to index file
-		// Set default command
+		(void)strcpy( buffer, "GET macaroon" );		// Set default command
 	}
 
 //	(void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
@@ -201,10 +194,14 @@ void *web( void *arg ) {
 
 	// send response data, hopefully in html format
 
-	int sz = sprintf( buffer, html_head );
-	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\nThe data would show here: " );
+	int sz = sprintf( buffer, html_head );		// Start page with string with html and head /head tags and opening body tag
+
+	// Here we sprintf the html contents for display
+	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n<h2>The data would show here: " );
 	sz += sprintf( &buffer[sz], command );
-	sz += sprintf( &buffer[sz], html_foot );
+	sz += sprintf( &buffer[sz], "</h2>" );
+
+	sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tag, finalize the page
 	(void)write( webData->sender, buffer, strlen( buffer ) );
 
 	(void)printf( " done sending, command: %s\n", command );
@@ -327,12 +324,10 @@ int main(int argc, char **argv) {
 
 	(void)setpgrp();							// break away from process group
 
-#endif	// BECOME_ZOMBIE
-
-
-//	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
+	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
 	(void)signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
 
+#endif	// BECOME_ZOMBIE
 
 	// we want to start a new thread to monitor our user input processes
 	pthread_t pThreadUser;	// this is our thread identifier
@@ -347,8 +342,8 @@ int main(int argc, char **argv) {
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param2" );
 	if ( 0 != resultTime ) {
-		(void)printf( "\n\npthread_create 1 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 1", 0 );
+		(void)printf( "\n\npthread_create 2 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 2", 0 );
 //		exit( 5 );								// parent returns failure to shell
 	}
 
@@ -379,10 +374,8 @@ int main(int argc, char **argv) {
 	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {
 		length = sizeof( cli_addr );
-		fprintf(stdout, "Before\n" );
 		if ( ( socketfd = accept( listenfd, (struct sockaddr *)&cli_addr, &length) ) < 0 )
 			nlog( ERROR, "system call", "accept", 0 );
-		fprintf(stdout, " After\n" );
 
 		struct web_data webData;
 		webData.listener = listenfd;
@@ -391,7 +384,7 @@ int main(int argc, char **argv) {
 
 		int result = pthread_create( &pThread, NULL, web, &webData );
 		if ( 0 != result ) {
-			nlog( ERROR, "system call", "pthread_create", 0 );
+			nlog( ERROR, "system call", "pthread_create x", 0 );
 			exit( 5 );								// parent returns failure to shell
 		}
 	}

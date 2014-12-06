@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <string.h>
 
 #include "userLoop.h"
@@ -21,6 +21,7 @@ void *monitorUserOps( void *arg ) {
 //	fprintf(stdout, msg );
 
 	while ( 1 ) {
+		printf( "\nCommand: " );
 		scanf( "%s", command );
 		printf( "\n\nGot command: %s\n\n", command );
 
@@ -37,4 +38,4 @@ void *monitorUserOps( void *arg ) {
 }
 
 
-// End of monitorUserOps
+// End of userLoop.c

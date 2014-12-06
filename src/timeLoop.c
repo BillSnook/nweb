@@ -16,7 +16,7 @@
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
-//#define	ENABLE_IO
+#define	ENABLE_IO
 
 #ifdef	ENABLE_IO
 #include "../utilities/nwInterface.h"
@@ -82,7 +82,7 @@ void *monitorTimeOps( void *arg ) {
 
 void sig_handler(int signo) {
     if (signo == SIGINT) {
-        printf("\n        Closing IO nicely\n\n");
+        printf("\n\n        Closing IO nicely\n\n");
         running = -1;
     }
 }

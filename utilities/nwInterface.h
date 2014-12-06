@@ -5,8 +5,6 @@
 //      Author: Bill
 //
 
-#include <stdio.h>
-
 
 #ifndef NWINTERFACE_H_
 #define NWINTERFACE_H_

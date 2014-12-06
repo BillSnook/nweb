@@ -6,7 +6,6 @@
 //
 
 
-//#include <signal.h>
 #include <stdio.h>
 //#include <stdlib.h>
 //#include <unistd.h>
@@ -14,10 +13,9 @@
 #include <time.h>
 
 #include "nwTime.h"
-//#include "mraa.h"
 
 
-#define	CLOCK_RATE		500000
+#define	CLOCK_RATE		500000		// Clocks per second, ~500000Hz
 
 double start = 0.0;
 
@@ -36,4 +34,4 @@ double getElapsedTime() {
 	return( ((double) (end - start)) / CLOCKS_PER_SEC );
 }
 
-// End of nwTime.cpp
+// End of nwTime.c
