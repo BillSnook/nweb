@@ -9,7 +9,9 @@
 #define USERLOOP_H_
 
 
-char command[256];				// storage for input
+char	command[256];				// storage for input
+
+int		commandCode;				// Code for individual commands
 
 
 void *monitorUserOps( void *arg );

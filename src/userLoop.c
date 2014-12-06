@@ -28,6 +28,9 @@ void *monitorUserOps( void *arg ) {
 //			pthread_exit( NULL );					// Kill thread
 			exit( 1 );								// Or kill program
 		}
+		if ( 0 == strcmp( "guppy", command ) ) {
+			printf( "\n\nGot guppy !!\n\n" );
+		}
 	}
 
 	return NULL;
