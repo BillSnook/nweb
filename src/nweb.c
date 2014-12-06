@@ -34,6 +34,7 @@
 
 #include "userLoop.h"
 #include "timeLoop.h"
+#include "../commands/parser.h"
 
 
 #define BUFSIZE		8096
@@ -181,10 +182,16 @@ void *web( void *arg ) {
 
 //	This variant extracts a string from the GET message
 //	It then tries to validate the string as a command and then to execute it
+	printf( "\n  received web command:\n%s\n", buffer );
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri - special case
-		(void)strcpy( buffer, "GET macaroon" );		// Set default command
+		(void)strcpy( buffer, "GET /macaroon" );		// Set default command
 	}
+
+	// Here we parse the command
+//	char *commandString = &buffer[5];
+
+	// Here we create the response page
 
 //	(void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //	(void)write( webData->sender, buffer, strlen( buffer ) );
@@ -197,7 +204,8 @@ void *web( void *arg ) {
 	int sz = sprintf( buffer, html_head );		// Start page with string with html and head /head tags and opening body tag
 
 	// Here we sprintf the html contents for display
-	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n<h2>The data would show here: " );
+	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n" );
+	sz += sprintf( &buffer[sz], "<h2>The data would show here: " );
 	sz += sprintf( &buffer[sz], command );
 	sz += sprintf( &buffer[sz], "</h2>" );
 

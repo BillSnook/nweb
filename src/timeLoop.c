@@ -13,6 +13,7 @@
 #include <signal.h>
 
 #include "timeLoop.h"
+#include "../commands/parser.h"
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board

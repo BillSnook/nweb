@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "userLoop.h"
+#include "../commands/parser.h"
 
 
 void *monitorUserOps( void *arg ) {

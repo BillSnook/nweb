@@ -76,6 +76,7 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.2098074239" name="index.html" rcbsApplicability="disable" resourcePath="src/web_src/index.html" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.342268763" name="nweb.js" rcbsApplicability="disable" resourcePath="src/web_src/nweb.js" toolsToInvoke=""/>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="commands"/>
 						<entry excluding="utilities" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utilities"/>
 					</sourceEntries>
@@ -150,6 +151,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="commands"/>
 						<entry excluding="utilities" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utilities"/>
 					</sourceEntries>
