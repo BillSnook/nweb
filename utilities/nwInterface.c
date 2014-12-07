@@ -25,11 +25,11 @@ int setupGPIO( int pinNumber ) {
 
 	mraa_init();
 
-    printf( "\nHello mraa\n" );
-    printf( "  Version: %s\n", mraa_get_version() );
+//    printf( "\n  Hello mraa\n" );
+//    printf( "  mraa Version: %s\n", mraa_get_version() );
 
-    mraa_platform_t platform = mraa_get_platform_type();
-    printf( "  Platform type: %d\n", platform );
+//    mraa_platform_t platform = mraa_get_platform_type();
+//    printf( "  Platform type: %d\n", platform );
 
     on = 0;
 
@@ -40,8 +40,8 @@ int setupGPIO( int pinNumber ) {
         printf( "  Failed initing gpio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
-    } else {
-        printf( "  Inited gpio: %p\n", gpio );
+//    } else {
+//        printf( "  Inited gpio: %p\n", gpio );
     }
 
     response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );

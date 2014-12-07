@@ -9,28 +9,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 #include <string.h>
 #include <signal.h>
 
 #include "timeLoop.h"
-#include "../commands/parser.h"
+//#include "../commands/parser.h"
+#include "../utilities/nwTime.h"
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
 #define	ENABLE_IO
 
+
 #ifdef	ENABLE_IO
+
 #include "../utilities/nwInterface.h"
-#endif	// ENABLE_IO
 
-
-#include "../utilities/nwTime.h"
-
-
-#ifdef	ENABLE_IO
 #define	DEFAULT_LOOP_TIME	1.0
+
 #else	// ENABLE_IO
+
 #define	DEFAULT_LOOP_TIME	10.0
+
 #endif	// ENABLE_IO
 
 
@@ -43,7 +44,7 @@ void *monitorTimeOps( void *arg ) {
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
-	fprintf(stdout, "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
+//	fprintf(stdout, "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
     signal(SIGINT, sig_handler);
 
@@ -59,7 +60,7 @@ void *monitorTimeOps( void *arg ) {
     		startElapsedTime();
 
 #ifdef	ENABLE_IO
-    		togglePin();
+//    		togglePin();
 #else	// ENABLE_IO
 //        	fprintf(stdout, "\n    Tick\n" );
 #endif	// ENABLE_IO
@@ -71,12 +72,8 @@ void *monitorTimeOps( void *arg ) {
     closeGPIO();
 #endif	// ENABLE_IO
 
-//#ifdef	USE_THREADS
-//	pthread_detach( pthread_self() );
-//	pthread_exit( NULL );
-//#else	// USE_THREADS
 	exit( 1 );						// Exit program when told to quit via cntl-C
-//#endif	// USE_THREADS
+
 	return NULL;
 }
 
