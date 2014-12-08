@@ -137,7 +137,8 @@ void *webService( void *arg ) {
 	char buffer[BUFSIZE+1];
 	extern char command[];	// Access commands entered from the command line
 
-	fprintf(stdout, " got html request to handle\n" );
+	fprintf(stdout, "\n" );
+//	fprintf(stdout, "  got html request to handle\n" );
 
 //	pthread_detach( pthread_self() );
 
@@ -154,15 +155,17 @@ void *webService( void *arg ) {
 	else
 		buffer[0] = 0;
 
-//	(void)printf( " before cr/lf scrub\n" );
-	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
-		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
-			buffer[i] = '*';
-
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, webData->socketfd );
 	}
+
+	// Command parsed
+	(void)printf( "  got request:\n%s\n", &buffer[4] );
+
+	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
+		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
+			buffer[i] = '*';
 
 	// extract uri by terminating string
 	for ( i = 4; i < BUFSIZE; i++ ) {			// null terminate after the second space to ignore extra stuff
@@ -171,9 +174,6 @@ void *webService( void *arg ) {
 			break;
 		}
 	}
-
-	// Command parsed
-	(void)printf( "  got request for %s\n", &buffer[4] );
 
 	for ( j = 4; j < i-1; j++ )						// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
@@ -184,7 +184,7 @@ void *webService( void *arg ) {
 
 //	This variant extracts a string from the GET message
 //	It then tries to validate the string as a command and then to execute it
-	printf( "\n  received web command:\n%s\n", buffer );
+	printf( "  received web command:\n%s\n", buffer );
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri - special case
 		(void)strcpy( buffer, "GET /macaroon" );		// Set default command
@@ -215,7 +215,7 @@ void *webService( void *arg ) {
 	sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tag, finalize the page
 	(void)write( webData->socketfd, buffer, strlen( buffer ) );
 
-	(void)printf( " done sending, command: %s\n", command );
+	(void)printf( "  done sending, command: %s\n", command );
 
 #else	// NEW_CONTROLS
 

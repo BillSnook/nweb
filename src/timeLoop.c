@@ -40,7 +40,7 @@ int		running = 0;
 
 void *monitorTimeOps( void *arg ) {
 
-//	(void)printf( "printf in monitorTimeOps\n" );
+	(void)printf( "Start real-time action control\n" );
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 

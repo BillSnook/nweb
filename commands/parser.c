@@ -33,6 +33,7 @@ int parseCommand( char *command ) {
 	}
 
 	if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program is entered
+		printf( "\n\nGot exit !!\n\n" );
 //		pthread_exit( NULL );					// Kill thread
 		exit( 1 );								// Kill program
 	}

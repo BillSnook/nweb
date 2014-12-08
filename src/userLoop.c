@@ -17,7 +17,7 @@
 
 void *monitorUserOps( void *arg ) {
 
-//	(void)printf( "printf in monitorUserOps\n" );
+	(void)printf( "Starting user command input\n" );
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
