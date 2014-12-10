@@ -134,9 +134,7 @@ int main(int argc, char **argv) {
 			nlog( ERROR, "system call", "accept", 0 );
 
 		web_data webData;
-//		webData.listener = listenfd;
 		webData.socketfd = socketfd;
-//		webData.hit = hit;
 
 		int result = pthread_create( &pThread, NULL, webService, &webData );
 		if ( 0 != result ) {
