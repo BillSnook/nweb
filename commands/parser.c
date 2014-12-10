@@ -16,6 +16,9 @@
 #include "../utilities/nwInterface.h"
 
 
+extern	mraa_gpio_context gpio;
+
+
 //--	----	----	----
 
 
@@ -23,7 +26,7 @@ int parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "toggle", command ) ) {
 		printf( "\n\nGot toggle !!\n\n" );
-		togglePin();
+		togglePin( gpio );
 		return 1;
 	}
 

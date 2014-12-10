@@ -9,7 +9,6 @@
 #include <stdio.h>
 
 #include "nwInterface.h"
-#include "mraa.h"
 
 
 int response;
@@ -18,12 +17,16 @@ int on;
 
 int adc_value;
 
-mraa_gpio_context gpio;
+extern	mraa_gpio_context gpio;
 
 
-int setupGPIO( int pinNumber ) {
+void startMRAA( void ) {
 
 	mraa_init();
+}
+
+
+mraa_gpio_context setupGPIO( int pinNumber ) {
 
 //    printf( "\n  Hello mraa\n" );
 //    printf( "  mraa Version: %s\n", mraa_get_version() );
@@ -51,11 +54,11 @@ int setupGPIO( int pinNumber ) {
         return 0;
     }
 
-   	return 1;
+   	return gpio;
 }
 
 
-void togglePin() {
+void togglePin(  mraa_gpio_context gpio ) {
 
 	response = mraa_gpio_write( gpio, on );
     if (response != MRAA_SUCCESS) {
@@ -66,7 +69,7 @@ void togglePin() {
 }
 
 
-void outputPin( int offOn ) {
+void outputPin(  mraa_gpio_context gpio, int offOn ) {
 
 	response = mraa_gpio_write( gpio, offOn );
     if (response != MRAA_SUCCESS) {
@@ -76,7 +79,13 @@ void outputPin( int offOn ) {
 
 
 
-void closeGPIO( void ) {
+void closeGPIO( mraa_gpio_context gpio ) {
+
+	mraa_gpio_close( gpio );
+}
+
+
+void closeMRAA( void ) {
 
 	mraa_deinit();
 }

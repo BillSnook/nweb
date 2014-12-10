@@ -98,6 +98,19 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 }
 
 
+// Check for top level directories where web users should not go, ever
+int webDirectoryCheck( char *baseDir ) {
+	if ( !strncmp(baseDir,"/"   ,2 ) || !strncmp(baseDir,"/etc", 5 ) ||
+			!strncmp(baseDir,"/bin",5 ) || !strncmp(baseDir,"/lib", 5 ) ||
+			!strncmp(baseDir,"/tmp",5 ) || !strncmp(baseDir,"/usr", 5 ) ||
+			!strncmp(baseDir,"/dev",5 ) || !strncmp(baseDir,"/sbin",6) ){
+		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", baseDir);
+		return 0;
+	}
+	return 1;
+}
+
+
 void printWebHelp() {
 
 #ifdef	NEW_CONTROLS
@@ -109,7 +122,7 @@ void printWebHelp() {
 				 "  Example: nweb 8080 /home/root/Code/Test &\n\n"
 				 );
 
-	#else	// NEW_CONTROLS
+#else	// NEW_CONTROLS
 	int i;
 
 	(void)printf("hint: nweb Port-Number Top-Directory\n\n"
@@ -175,7 +188,7 @@ void *webService( void *arg ) {
 		}
 	}
 
-	for ( j = 4; j < i-1; j++ )						// check for illegal parent directory use ..
+	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, webData->socketfd );
 		}
@@ -241,6 +254,7 @@ void *webService( void *arg ) {
 	}
 	if ( fileType == 0 ) {
 		nlog( FORBIDDEN, "file extension type not supported", buffer, webData->socketfd );
+		// Hidden command check here - unrecognized file name ending
 	}
 
 	// investigate file name, handle it
@@ -250,6 +264,7 @@ void *webService( void *arg ) {
 	// validate the filePath string to determine what to return - default is file at URI path
 	if ( ( file_fd = open( filePath, O_RDONLY ) ) == -1 ) {		// open the file for reading
 		nlog(NOTFOUND, "failed to open file",  filePath, webData->socketfd );
+		// Hidden command check here - file with recognized type not found
 	}
 
 	// Send response - only one for now
@@ -263,9 +278,9 @@ void *webService( void *arg ) {
 //	(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// Shorter version, length not needed
 //	(void)write( webData->socketfd, buffer, strlen( buffer ) );
 
-	// send file in 8KB block - last block may be smaller
-	while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {
-		(void)write( webData->socketfd, buffer, ret );
+	// send file in 8KB blocks - last block may be smaller
+	while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
+		(void)write( webData->socketfd, buffer, ret );			// write to client
 	}
 	(void)printf( " done sending\n" );
 

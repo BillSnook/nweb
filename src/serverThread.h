@@ -23,9 +23,8 @@ struct fileMap {
 
 
 struct web_data {
-//	int			listener;
 	int			socketfd;
-//	int			hit;
+//	int			context;
 };
 typedef	struct web_data		web_data;
 
@@ -34,6 +33,8 @@ typedef	struct web_data		web_data;
 void nlog(int type, char *s1, char *s2, int socket_fd);
 
 void printWebHelp();
+
+int webDirectoryCheck( char *baseDir );
 
 void *webService( void *arg );
 

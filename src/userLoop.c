@@ -14,19 +14,20 @@
 #include "userLoop.h"
 #include "../commands/parser.h"
 
-
+// Thread master, loop prompting for a command and then parsing it, rinse, repeat;
+// ToDo: spawn thread to parse command to achieve better performance
 void *monitorUserOps( void *arg ) {
 
 	(void)printf( "Starting user command input\n" );
 //	char *msg = arg;
 //	fprintf(stdout, msg );
 
-	sleep( 1 );
+	sleep( 1 );		// Let other threads initialize before presenting command prompt
 
 	while ( 1 ) {
 		printf( "\nCommand: " );
 		scanf( "%s", command );
-		printf( "\n\nGot command: %s\n\n", command );
+		printf( "\nGot command: %s\n", command );
 
 		parseCommand( command );
 	}

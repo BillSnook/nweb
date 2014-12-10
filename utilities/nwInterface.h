@@ -9,11 +9,22 @@
 #ifndef NWINTERFACE_H_
 #define NWINTERFACE_H_
 
+#include "mraa.h"
 
-int setupGPIO( int pinNumber );
-void togglePin();
-void outputPin( int offOn );
-void closeGPIO( void );
+
+mraa_gpio_context gpio;
+
+
+void startMRAA( void );
+
+mraa_gpio_context setupGPIO( int pinNumber );
+
+void togglePin( mraa_gpio_context gpio);
+void outputPin( mraa_gpio_context gpio, int offOn );
+
+void closeGPIO(  mraa_gpio_context gpio );
+
+void closeMRAA( void );
 
 
 

@@ -52,20 +52,17 @@ int main(int argc, char **argv) {
 		exit( 0 );
 	}
 
-	if ( !strncmp(argv[2],"/"   ,2 ) || !strncmp(argv[2],"/etc", 5 ) ||
-	   !strncmp(argv[2],"/bin",5 ) || !strncmp(argv[2],"/lib", 5 ) ||
-	   !strncmp(argv[2],"/tmp",5 ) || !strncmp(argv[2],"/usr", 5 ) ||
-	   !strncmp(argv[2],"/dev",5 ) || !strncmp(argv[2],"/sbin",6) ){
-		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", argv[2]);
+	baseDirectory = argv[2];
+	if ( 0 == webDirectoryCheck( baseDirectory ) ){	// if top level directory where user should never go
+		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
 		exit(3);
 	}
 
 	if ( chdir(argv[2]) == -1 ) {
-		(void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
+		(void)printf("ERROR: Can't Change to directory in second argument: %s\n",argv[2]);
 		exit(4);
 	}
 
-	baseDirectory = argv[2];
 
 #ifdef	BECOME_ZOMBIE
 	// Create daemon + unstoppable and no zombie children (= no wait())
@@ -77,9 +74,10 @@ int main(int argc, char **argv) {
 			return 0;							// parent returns OK to shell
 		}
 	}
+
 	// child
 	for (i = 0; i < 32; i++ )
-		(void)close( i );						// close open files
+		(void)close( i );						// close open files (such as i/o)
 
 	(void)setpgrp();							// break away from process group
 

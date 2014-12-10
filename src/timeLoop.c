@@ -19,12 +19,14 @@
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
-#define	ENABLE_IO
+//#define	ENABLE_IO
 
 
 #ifdef	ENABLE_IO
 
 #include "../utilities/nwInterface.h"
+
+extern	mraa_gpio_context gpio;
 
 #define	DEFAULT_LOOP_TIME	1.0
 
@@ -51,6 +53,7 @@ void *monitorTimeOps( void *arg ) {
     double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifdef	ENABLE_IO
+    startMRAA();
 	setupGPIO( 13 );
 #endif	// ENABLE_IO
 
@@ -60,7 +63,7 @@ void *monitorTimeOps( void *arg ) {
     		startElapsedTime();
 
 #ifdef	ENABLE_IO
-//    		togglePin();
+//    		togglePin( gpio );
 #else	// ENABLE_IO
 //        	fprintf(stdout, "\n    Tick\n" );
 #endif	// ENABLE_IO
@@ -69,7 +72,9 @@ void *monitorTimeOps( void *arg ) {
     }
 
 #ifdef	ENABLE_IO
-    closeGPIO();
+    closeGPIO( gpio );
+
+    closeMRAA();
 #endif	// ENABLE_IO
 
 	exit( 1 );						// Exit program when told to quit via cntl-C
