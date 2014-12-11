@@ -10,6 +10,7 @@
 
 #include "nwInterface.h"
 
+#ifdef	ENABLE_IO
 
 int response;
 int iopin;
@@ -90,6 +91,7 @@ void closeMRAA( void ) {
 	mraa_deinit();
 }
 
+#endif	// ENABLE_IO
 
 // End of nwInterface.c
 

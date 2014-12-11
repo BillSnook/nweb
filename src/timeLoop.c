@@ -13,13 +13,10 @@
 #include <string.h>
 #include <signal.h>
 
+#include "common.h"
 #include "timeLoop.h"
 //#include "../commands/parser.h"
 #include "../utilities/nwTime.h"
-
-
-// Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
-#define	ENABLE_IO
 
 
 #ifdef	ENABLE_IO

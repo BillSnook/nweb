@@ -9,6 +9,12 @@
 #ifndef NWINTERFACE_H_
 #define NWINTERFACE_H_
 
+
+#include "../src/common.h"
+
+
+#ifdef	ENABLE_IO
+
 #include "mraa.h"
 
 
@@ -26,6 +32,7 @@ void closeGPIO(  mraa_gpio_context gpio );
 
 void closeMRAA( void );
 
+#endif	// ENABLE_IO
 
 
 #endif /* NWINTERFACE_H_ */

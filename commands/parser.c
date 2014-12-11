@@ -11,12 +11,14 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "../src/common.h"
 #include "parser.h"
 
 #include "../utilities/nwInterface.h"
 
-
+#ifdef	ENABLE_IO
 extern	mraa_gpio_context gpio;
+#endif	// ENABLE_IO
 
 
 //--	----	----	----
@@ -24,11 +26,13 @@ extern	mraa_gpio_context gpio;
 
 int parseCommand( char *command ) {
 
+#ifdef	ENABLE_IO
 	if ( 0 == strcmp( "toggle", command ) ) {
 		printf( "\n\nGot toggle !!\n\n" );
 		togglePin( gpio );
 		return 1;
 	}
+#endif	// ENABLE_IO
 
 	if ( 0 == strcmp( "guppy", command ) ) {	// test
 		printf( "\n\nGot guppy !!\n\n" );
