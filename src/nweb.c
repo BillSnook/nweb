@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 	}
 
 	baseDirectory = argv[2];
-	if ( 0 == webDirectoryCheck( baseDirectory ) ){	// if top level directory where user should never go
+	if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
 		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
 		exit(3);
 	}
@@ -135,6 +135,7 @@ int main(int argc, char **argv) {
 
 		web_data webData;
 		webData.socketfd = socketfd;
+		webData.baseDirectory = baseDirectory;
 
 		int result = pthread_create( &pThread, NULL, webService, &webData );
 		if ( 0 != result ) {

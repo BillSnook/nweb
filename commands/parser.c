@@ -39,10 +39,15 @@ int parseCommand( char *command ) {
 		return 1;
 	}
 
+	if ( 0 == strcmp( "moosetrap", command ) ) {	// test
+		printf( "\n\nGot moosetrap !!\n\n" );
+		return 1;
+	}
+
 	if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program is entered
 		printf( "\n\nGot exit !!\n\n" );
 //		pthread_exit( NULL );					// Kill thread
-		exit( 1 );								// Kill program
+//		exit( 1 );								// Kill program
 	}
 
 	return 0;

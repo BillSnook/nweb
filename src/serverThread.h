@@ -24,7 +24,7 @@ struct fileMap {
 
 struct web_data {
 	int			socketfd;
-//	int			context;
+	char		*baseDirectory;
 };
 typedef	struct web_data		web_data;
 
