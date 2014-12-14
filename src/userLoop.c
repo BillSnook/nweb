@@ -20,7 +20,7 @@ void *monitorUserOps( void *arg ) {
 
 	(void)printf( "Starting user command input\n" );
 //	char *msg = arg;
-//	fprintf(stdout, msg );
+//	printf( msg );
 
 	sleep( 1 );		// Let other threads initialize before presenting command prompt
 

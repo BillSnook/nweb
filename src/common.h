@@ -10,11 +10,11 @@
 
 
 // Enable to use i/o code on Edison Arduino breakout board, disable to run on Edison breakout board
-//#define	ENABLE_IO
+#define	ENABLE_IO
 
 
 #define	VERSION		0
-#define	SUB_VERSION	16
+#define	SUB_VERSION	17
 
 
 #endif /* COMMON_H_ */

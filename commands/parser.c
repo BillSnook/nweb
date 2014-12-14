@@ -26,13 +26,15 @@ extern	mraa_gpio_context gpio;
 
 int parseCommand( char *command ) {
 
-#ifdef	ENABLE_IO
 	if ( 0 == strcmp( "toggle", command ) ) {
 		printf( "\n\nGot toggle !!\n\n" );
+#ifdef	ENABLE_IO
 		togglePin( gpio );
 		return 1;
-	}
+#else	// ENABLE_IO
+		return 0;
 #endif	// ENABLE_IO
+	}
 
 	if ( 0 == strcmp( "guppy", command ) ) {	// test
 		printf( "\n\nGot guppy !!\n\n" );
@@ -47,7 +49,7 @@ int parseCommand( char *command ) {
 	if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program is entered
 		printf( "\n\nGot exit !!\n\n" );
 //		pthread_exit( NULL );					// Kill thread
-//		exit( 1 );								// Kill program
+		exit( 1 );								// Kill program
 	}
 
 	return 0;

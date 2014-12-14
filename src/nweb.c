@@ -54,12 +54,12 @@ int main(int argc, char **argv) {
 
 	baseDirectory = argv[2];
 	if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
-		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
+		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
 		exit(3);
 	}
 
 	if ( chdir(argv[2]) == -1 ) {
-		(void)printf("ERROR: Can't Change to directory in second argument: %s\n",argv[2]);
+		printf("ERROR: Can't Change to directory in second argument: %s\n",argv[2]);
 		exit(4);
 	}
 
@@ -77,12 +77,12 @@ int main(int argc, char **argv) {
 
 	// child
 	for (i = 0; i < 32; i++ )
-		(void)close( i );						// close open files (such as i/o)
+		close( i );						// close open files (such as i/o)
 
-	(void)setpgrp();							// break away from process group
+	setpgrp();							// break away from process group
 
-	(void)signal(SIGCHLD, SIG_IGN);				// ignore child death
-	(void)signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
+	signal(SIGCHLD, SIG_IGN);				// ignore child death
+	signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
 
 #endif	// BECOME_ZOMBIE
 
@@ -90,21 +90,17 @@ int main(int argc, char **argv) {
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param1" );
 	if ( 0 != resultTime ) {
-		(void)printf( "\n\npthread_create 1 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 1", 0 );
-//		exit( 5 );								// parent returns failure to shell
+		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 1", 0 );	// returns failure to shell
 	}
 
 	// we want to start a new thread to monitor our user input processes
 	pthread_t pThreadUser;	// this is our thread identifier
 	int resultUser = pthread_create( &pThreadUser, NULL, monitorUserOps, "param2" );
 	if ( 0 != resultUser ) {
-		(void)printf( "\n\npthread_create 2 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 2", 0 );
-//		exit( 5 );								// parent returns failure to shell
+		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 2", 0 );	// returns failure to shell
 	}
-
-//	nlog( LOG, "nweb starting", argv[1], getpid() );
 
 	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
@@ -125,7 +121,7 @@ int main(int argc, char **argv) {
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-	fprintf(stdout, "\nStarting web server process\n" );
+	printf( "\nStarting web server process\n" );
 
 	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {
@@ -133,14 +129,17 @@ int main(int argc, char **argv) {
 		if ( ( socketfd = accept( listenfd, (struct sockaddr *)&cli_addr, &length) ) < 0 )
 			nlog( ERROR, "system call", "accept", 0 );
 
-		web_data webData;
-		webData.socketfd = socketfd;
-		webData.baseDirectory = baseDirectory;
+		web_data *webData = malloc( sizeof( web_data ) );
+		if ( webData ) {
+			webData->socketfd = socketfd;
+			webData->baseDirectory = baseDirectory;
 
-		int result = pthread_create( &pThread, NULL, webService, &webData );
-		if ( 0 != result ) {
-			nlog( ERROR, "system call", "pthread_create x", 0 );
-			exit( 5 );								// parent returns failure to shell
+			int result = pthread_create( &pThread, NULL, webService, webData );
+			if ( 0 != result ) {
+				nlog( ERROR, "system call", "pthread_create x", 0 );
+			}
+		} else {
+			nlog( ERROR, "system call", "allocate web_data", 0 );
 		}
 	}
 }

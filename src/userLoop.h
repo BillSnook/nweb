@@ -9,7 +9,9 @@
 #define USERLOOP_H_
 
 
-char	command[256];				// storage for input
+#define	COMMAND_SZ		256
+
+char	command[COMMAND_SZ];		// storage for command input string
 
 int		commandCode;				// Code for individual commands
 

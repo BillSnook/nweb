@@ -57,33 +57,33 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 
 	switch (type) {
 		case ERROR:
-			(void)sprintf(logbuffer,"ERROR: %s:%s Errno=%d (%d) exiting pid=%d", s1, s2, errno, socket_fd, getpid() );
+			sprintf(logbuffer,"ERROR: %s:%s Errno=%d (%d) exiting pid=%d", s1, s2, errno, socket_fd, getpid() );
 			break;
 
 		case FORBIDDEN:
-			(void)write(socket_fd, "HTTP/1.1 403 Forbidden\nContent-Length: 185\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\nThe requested URL, file type or operation is not allowed on this simple static file webserver.\n</body></html>\n",271);
-			(void)sprintf(logbuffer,"FORBIDDEN: %s:%s",s1, s2);
+			write(socket_fd, "HTTP/1.1 403 Forbidden\nContent-Length: 185\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\nThe requested URL, file type or operation is not allowed on this simple static file webserver.\n</body></html>\n",271);
+			sprintf(logbuffer,"FORBIDDEN: %s:%s",s1, s2);
 			break;
 
 		case NOTFOUND:
-			(void)write(socket_fd, "HTTP/1.1 404 Not Found\nContent-Length: 136\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\nThe requested URL was not found on this server.\n</body></html>\n",224);
-			(void)sprintf(logbuffer,"NOT FOUND: %s:%s",s1, s2);
+			write(socket_fd, "HTTP/1.1 404 Not Found\nContent-Length: 136\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\nThe requested URL was not found on this server.\n</body></html>\n",224);
+			sprintf(logbuffer,"NOT FOUND: %s:%s",s1, s2);
 			break;
 
 		case LOG:
-			(void)sprintf(logbuffer," INFO: %s:%s:%d",s1, s2, socket_fd );
+			sprintf(logbuffer," INFO: %s:%s:%d",s1, s2, socket_fd );
 			break;
 
 		default:
-			(void)sprintf(logbuffer," Unrecognized: %s:%s:%d",s1, s2, socket_fd );
+			sprintf(logbuffer," Unrecognized: %s:%s:%d",s1, s2, socket_fd );
 			break;
 	}
 
 	// no checks here, nothing can be done a failure anyway
 	if ( ( fd = open( "nweb.log", O_CREAT | O_WRONLY | O_APPEND, 0644 ) ) >= 0 ) {
-		(void)write( fd, logbuffer, strlen( logbuffer ) );
-		(void)write( fd, "\n",  1 );
-		(void)close( fd );
+		write( fd, logbuffer, strlen( logbuffer ) );
+		write( fd, "\n",  1 );
+		close( fd );
 	}
 
 	if ( type == ERROR )
@@ -101,7 +101,7 @@ int webDirectoryCheck( char *baseDir ) {
 			!strncmp(baseDir,"/bin",5 ) || !strncmp(baseDir,"/lib", 5 ) ||
 			!strncmp(baseDir,"/tmp",5 ) || !strncmp(baseDir,"/usr", 5 ) ||
 			!strncmp(baseDir,"/dev",5 ) || !strncmp(baseDir,"/sbin",6) ){
-		(void)printf("ERROR: Bad top directory %s, see nweb -?\n", baseDir);
+		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDir);
 		return 0;
 	}
 	return 1;
@@ -112,7 +112,7 @@ void printWebHelp() {
 
 #ifdef	NEW_CONTROLS
 
-	(void)printf("hint: nweb Port-Number Top-Directory\n\n"
+	printf("hint: nweb Port-Number Top-Directory\n\n"
 				 "  nweb is a small and very safe mini web server\n"
 				 "  Specify a port and a named directory to start.\n"
 				 "  There are no fancy features = safe and secure.\n\n"
@@ -122,7 +122,7 @@ void printWebHelp() {
 #else	// NEW_CONTROLS
 	int i;
 
-	(void)printf("hint: nweb Port-Number Top-Directory\n\n"
+	printf("hint: nweb Port-Number Top-Directory\n\n"
 				 "\tnweb is a small and very safe mini web server\n"
 				 "\tnweb only servers out file/web pages with extensions named below\n"
 				 "\t and only from the named directory or its sub-directories.\n"
@@ -130,9 +130,9 @@ void printWebHelp() {
 				 "\tExample: nweb 8080 /home/root/Code/Test &\n\n"
 				 "\tOnly Supports:");
 	for( i = 0; extensions[i].ext != 0; i++ )
-		(void)printf(" %s",extensions[i].ext );
+		printf(" %s",extensions[i].ext );
 
-	(void)printf("\n\tNot Supported: URLs including \"..\", Java, Javascript, CGI\n"
+	printf("\n\tNot Supported: URLs including \"..\", Java, Javascript, CGI\n"
 					 "\tNot Supported: directories / /etc /bin /lib /tmp /usr /dev/sbin \n"
 					 "\tNo warranty given or implied\n\tNigel Griffiths nag@uk.ibm.com\n"
 					 );
@@ -150,21 +150,15 @@ void doParse( int socketfd, char *commandString ) {
 //	It then tries to validate the string as a command and then to execute it
 	printf( "  received web command to parse:\n%s\n", commandString );
 
-	// Here we parse the command
-	parseCommand( commandString );
-
 	// Here we create the response page
-	// eventually we will fill this from the response to parseCommand
+//	sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
+//	write( socketfd, buffer, strlen( buffer ) );
 
-//	(void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
-//	(void)write( socketfd, buffer, strlen( buffer ) );
-
-	(void)sprintf( buffer, html_header );	// Shorter version, length not needed
-	(void)write( socketfd, buffer, strlen( buffer ) );
+	sprintf( buffer, html_header );	// Shorter version, length not needed
+	write( socketfd, buffer, strlen( buffer ) );
 
 	// send response data, hopefully in html format
-
-	int sz = sprintf( buffer, html_head );		// Start page with string with html and head /head tags and opening body tag
+	int sz = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
 
 	// Here we sprintf the html contents for display
 	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n" );
@@ -172,8 +166,12 @@ void doParse( int socketfd, char *commandString ) {
 	sz += sprintf( &buffer[sz], command );
 	sz += sprintf( &buffer[sz], "</h2>" );
 
-	sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tag, finalize the page
-	(void)write( socketfd, buffer, strlen( buffer ) );
+	sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
+	write( socketfd, buffer, strlen( buffer ) );
+
+	// Here we parse the command
+	parseCommand( commandString );
+	strcpy( command, commandString );
 }
 
 
@@ -187,8 +185,8 @@ void *webService( void *arg ) {
 	char * fileType;
 	static char filePath[256];					// static so zero filled
 
-	fprintf(stdout, "\n" );
-//	fprintf(stdout, "  got html request to handle\n" );
+	printf( "\n" );
+//	printf( "  got html request to handle\n" );
 
 //	pthread_detach( pthread_self() );
 
@@ -199,6 +197,10 @@ void *webService( void *arg ) {
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
+		close( webData->socketfd );
+		free( webData );
+		pthread_exit( NULL );
+		return NULL;
 	}
 
 	if ( ( ret > 0 ) && ( ret < BUFSIZE ) )		// return code is valid chars
@@ -209,10 +211,14 @@ void *webService( void *arg ) {
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
+		close( webData->socketfd );
+		free( webData );
+		pthread_exit( NULL );
+		return NULL;
 	}
 
 	// Command parsed
-	(void)printf( "  got request:\n%s\n", &buffer[4] );
+	printf( "  got request:\n%s\n", &buffer[4] );
 
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
@@ -229,12 +235,16 @@ void *webService( void *arg ) {
 	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
+			close( webData->socketfd );
+			free( webData );
+			pthread_exit( NULL );
+			return NULL;
 		}
 
 //	This variant extracts the uri from the GET message
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )	// check for missing uri
-		(void)strcpy( buffer, "GET /moosetrap" );										// default to index file
+		strcpy( buffer, "GET /moosetrap" );										// default to index file or default command??
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );
@@ -250,41 +260,43 @@ void *webService( void *arg ) {
 	if ( fileType != 0 ) {
 		// investigate file name, handle it
 		sprintf( filePath, "%s/%s", webData->baseDirectory, &buffer[5]);
-		(void)printf( " got filePath: %s\n", filePath );
+		printf( " got filePath: %s\n", filePath );
 
 		// validate the filePath string to determine what to return - default is file at URI path
 		if ( ( file_fd = open( filePath, O_RDONLY ) ) != -1 ) {
 			// Send response - only one for now
 //			nlog( LOG, "SEND", filePath, webData->hit );
 			len = (long)lseek( file_fd, (off_t)0, SEEK_END );			// lseek to the file end to find the length
-			(void)lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
-		    (void)sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
+			lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
+		    sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //			nlog( LOG, "Header", buffer, webData->hit );
-			(void)write( webData->socketfd, buffer, strlen( buffer ) );
+			write( webData->socketfd, buffer, strlen( buffer ) );
 
-//			(void)sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// Shorter version, length not needed
-//			(void)write( socketfd, buffer, strlen( buffer ) );
+//			sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// Shorter version, length not needed
+//			write( socketfd, buffer, strlen( buffer ) );
 
 			// send file in 8KB blocks - last block may be smaller
 			while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
-				(void)write( socketfd, buffer, ret );			// write to client
+				write( socketfd, buffer, ret );			// write to client
 			}
-			(void)printf( " done sending html response for file name %s\n", filePath );
+			printf( " done sending html response for file name %s\n", filePath );
 		} else {													// open the file for reading
 //			nlog(NOTFOUND, "failed to open file",  filePath, webData->socketfd );
 			// Hidden command check here - file with recognized type not found
 			doParse( socketfd, &buffer[5] );
-			(void)printf( "  done sending for file expected but not found, command: %s\n", command );
+			printf( "  done sending for file expected but not found, command: %s\n", command );
 		}
 
 	} else {
 //		nlog( FORBIDDEN, "file extension type not supported", buffer, webData->socketfd );
 		// Hidden command check here - unrecognized file name ending
 		doParse( socketfd, &buffer[5] );
-		(void)printf( "  done sending for non-file type, command: %s\n", command );
+		printf( "  done sending for non-file type, command: %s\n", command );
 	}
 
-	(void)close( webData->socketfd );
+	close( webData->socketfd );
+
+	free( webData );
 
 	pthread_exit( NULL );
 

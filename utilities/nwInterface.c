@@ -23,23 +23,23 @@ extern	mraa_gpio_context gpio;
 
 void startMRAA( void ) {
 
+	printf( "\n  I/O is enabled\n" );
 	mraa_init();
+
+//    printf( "\n  Hello mraa\n" );
+	printf( "  mraa Version: %s\n", mraa_get_version() );
+
+//    mraa_platform_t platform = mraa_get_platform_type();
+//    printf( "  Platform type: %d\n", platform );
+
 }
 
 
 mraa_gpio_context setupGPIO( int pinNumber ) {
 
-//    printf( "\n  Hello mraa\n" );
-//    printf( "  mraa Version: %s\n", mraa_get_version() );
-
-//    mraa_platform_t platform = mraa_get_platform_type();
-//    printf( "  Platform type: %d\n", platform );
-
     on = 0;
 
-    iopin = pinNumber;
-
-    gpio = mraa_gpio_init( iopin );
+    gpio = mraa_gpio_init( pinNumber );
     if ( ! gpio ) {
         printf( "  Failed initing gpio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );

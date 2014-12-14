@@ -41,9 +41,9 @@ void *monitorTimeOps( void *arg ) {
 
 	(void)printf( "Start real-time action control\n" );
 //	char *msg = arg;
-//	fprintf(stdout, msg );
+//	printf( msg );
 
-//	fprintf(stdout, "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
+//	printf( "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
     signal(SIGINT, sig_handler);
 
@@ -62,7 +62,7 @@ void *monitorTimeOps( void *arg ) {
 #ifdef	ENABLE_IO
 //    		togglePin( gpio );
 #else	// ENABLE_IO
-//        	fprintf(stdout, "\n    Tick\n" );
+//        	printf( "\n    Tick\n" );
 #endif	// ENABLE_IO
 
     	}
