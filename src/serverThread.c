@@ -148,7 +148,7 @@ void doParse( int socketfd, char *commandString ) {
 
 //	This variant extracts a string from the GET message
 //	It then tries to validate the string as a command and then to execute it
-	printf( "  received web command to parse:\n%s\n", commandString );
+	printf( "  received web command to parse:\n    %s\n", commandString );
 
 	// Here we create the response page
 //	sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
@@ -186,8 +186,6 @@ void *webService( void *arg ) {
 	static char filePath[256];					// static so zero filled
 
 	printf( "\n" );
-//	printf( "  got html request to handle\n" );
-
 //	pthread_detach( pthread_self() );
 
 	web_data *webData = arg;					// get pointer to web params to local struct
@@ -218,8 +216,6 @@ void *webService( void *arg ) {
 	}
 
 	// Command parsed
-	printf( "  got request:\n%s\n", &buffer[4] );
-
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
 			buffer[i] = '*';
@@ -231,6 +227,8 @@ void *webService( void *arg ) {
 			break;
 		}
 	}
+
+	printf( "  got GET request: %s\n", &buffer[4] );
 
 	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
@@ -257,16 +255,17 @@ void *webService( void *arg ) {
 			break;
 		}
 	}
-	if ( fileType != 0 ) {
+	if ( fileType != 0 ) {				// Found extent type that we support
 		// investigate file name, handle it
 		sprintf( filePath, "%s/%s", webData->baseDirectory, &buffer[5]);
-		printf( " got filePath: %s\n", filePath );
+		printf( "  got filePath: %s\n", filePath );
 
 		// validate the filePath string to determine what to return - default is file at URI path
-		if ( ( file_fd = open( filePath, O_RDONLY ) ) != -1 ) {
+		if ( ( file_fd = open( filePath, O_RDONLY ) ) != -1 ) {		// open file and check result
+			printf( "  found file at filePath: %s\n", filePath );
 			// Send response - only one for now
 //			nlog( LOG, "SEND", filePath, webData->hit );
-			len = (long)lseek( file_fd, (off_t)0, SEEK_END );			// lseek to the file end to find the length
+			len = (long)lseek( file_fd, (off_t)0, SEEK_END );		// lseek to the file end to find the length
 			lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
 		    sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //			nlog( LOG, "Header", buffer, webData->hit );
@@ -279,27 +278,24 @@ void *webService( void *arg ) {
 			while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
 				write( socketfd, buffer, ret );			// write to client
 			}
-			printf( " done sending html response for file name %s\n", filePath );
+			printf( " done replying for file URI: %s\n", filePath );
 		} else {													// open the file for reading
 //			nlog(NOTFOUND, "failed to open file",  filePath, webData->socketfd );
 			// Hidden command check here - file with recognized type not found
 			doParse( socketfd, &buffer[5] );
-			printf( "  done sending for file expected but not found, command: %s\n", command );
+			printf( "  done replying for file as command: %s\n", command );
 		}
 
 	} else {
 //		nlog( FORBIDDEN, "file extension type not supported", buffer, webData->socketfd );
 		// Hidden command check here - unrecognized file name ending
 		doParse( socketfd, &buffer[5] );
-		printf( "  done sending for non-file type, command: %s\n", command );
+		printf( "  done replying to command: %s\n", command );
 	}
 
 	close( webData->socketfd );
-
 	free( webData );
-
 	pthread_exit( NULL );
-
 	return NULL;
 }
 
