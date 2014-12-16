@@ -1,4 +1,4 @@
-web - a simple web server
+nweb - a simple web server
 =========
 
 Code for Intel Edison.

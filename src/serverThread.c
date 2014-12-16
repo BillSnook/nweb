@@ -243,6 +243,7 @@ void *webService( void *arg ) {
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )	// check for missing uri
 		strcpy( buffer, "GET /moosetrap" );										// default to index file or default command??
+//	strcpy( buffer, "GET /index.html" );										// default to index file or default command??
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );

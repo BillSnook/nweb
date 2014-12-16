@@ -112,6 +112,9 @@
 								<option id="gnu.c.compiler.option.include.paths.1830463347" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include"/>
 								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1231931500" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="ENABLE_IO"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.826279940" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
@@ -252,6 +255,8 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/iotdk-cpp-template"/>
 		</configuration>
+		<configuration configurationName="RunArduino"/>
+		<configuration configurationName="RunBB"/>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/iotdk-cpp-template"/>
 		</configuration>
