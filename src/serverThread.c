@@ -15,15 +15,13 @@
 
 #include <pthread.h>
 
-#include "common.h"
 //#include "userLoop.h"
 //#include "timeLoop.h"
 #include "serverThread.h"
 #include "../commands/parser.h"
 
 
-
-// This enables our new html control protocols (vs. html file display method)
+// This enables our new html control protocols on top of html file display methods
 #define	NEW_CONTROLS
 
 
@@ -43,6 +41,7 @@ struct fileMap extensions [] = {
 	{"tar", "image/tar" },
 	{"htm", "text/html" },
 	{"html","text/html" },
+	{"txt","text/html" },
 	{0,0}
 };
 
@@ -150,28 +149,36 @@ void doParse( int socketfd, char *commandString ) {
 //	It then tries to validate the string as a command and then to execute it
 	printf( "  received web command to parse:\n    %s\n", commandString );
 
-	// Here we create the response page
-//	sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
-//	write( socketfd, buffer, strlen( buffer ) );
-
-	sprintf( buffer, html_header );	// Shorter version, length not needed
-	write( socketfd, buffer, strlen( buffer ) );
-
-	// send response data, hopefully in html format
-	int sz = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
-
-	// Here we sprintf the html contents for display
-	sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n" );
-	sz += sprintf( &buffer[sz], "<h2>The data would show here: " );
-	sz += sprintf( &buffer[sz], command );
-	sz += sprintf( &buffer[sz], "</h2>" );
-
-	sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
-	write( socketfd, buffer, strlen( buffer ) );
-
 	// Here we parse the command
-	parseCommand( commandString );
+	char *returnData = parseCommand( commandString );
+	if ( returnData ) {
+		sprintf( buffer, html_header );
+		write( socketfd, buffer, strlen( buffer ) );
+
+		sprintf( buffer, returnData );
+	} else {
+		// Here we create the response page
+//		sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
+//		write( socketfd, buffer, strlen( buffer ) );
+
+		sprintf( buffer, html_header );
+		write( socketfd, buffer, strlen( buffer ) );
+
+		// send response data, hopefully in html format
+		int sz = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
+
+		// Here we sprintf the html contents for display
+		sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n" );
+		sz += sprintf( &buffer[sz], "<h2>The data would show here: " );
+		sz += sprintf( &buffer[sz], command );
+		sz += sprintf( &buffer[sz], "</h2>" );
+
+		sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
+	}
+	write( socketfd, buffer, strlen( buffer ) );
+
 	strcpy( command, commandString );
+
 }
 
 

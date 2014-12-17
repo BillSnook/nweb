@@ -19,6 +19,7 @@ int on;
 int adc_value;
 
 extern	mraa_gpio_context gpio;
+extern	mraa_pwm_context pwmo;
 
 
 void startMRAA( void ) {
@@ -86,6 +87,37 @@ void closeGPIO( mraa_gpio_context gpio ) {
 }
 
 
+mraa_pwm_context setupPWMO( int pinNumber ) {
+
+    on = 0;
+
+    pwmo = mraa_pwm_init( pinNumber );
+    if ( ! pwmo ) {
+        printf( "  Failed initing gpio\n" );
+        mraa_result_print( MRAA_ERROR_UNSPECIFIED );
+    	return 0;
+//    } else {
+//        printf( "  Inited gpio: %p\n", gpio );
+    }
+
+//    response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
+//    if (response != MRAA_SUCCESS) {
+//        printf( "  Failed setting gpio pin direction\n" );
+//        mraa_result_print((mraa_result_t) response);
+//        return 0;
+//    }
+
+   	return pwmo;
+}
+
+
+void closePWMO( mraa_pwm_context pwmo ) {
+
+	mraa_pwm_close( pwmo );
+}
+
+
+// Finally done with it
 void closeMRAA( void ) {
 
 	mraa_deinit();

@@ -9,6 +9,10 @@
 #define SERVERTHREAD_H_
 
 
+#define	VERSION		0
+#define	SUB_VERSION	19
+
+
 #define BUFSIZE		8096
 #define ERROR		42
 #define LOG			44

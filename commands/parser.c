@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../src/common.h"
 #include "parser.h"
 
 #include "../utilities/nwInterface.h"
@@ -24,26 +23,26 @@ extern	mraa_gpio_context gpio;
 //--	----	----	----
 
 
-int parseCommand( char *command ) {
+char *parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "toggle", command ) ) {
 		printf( "\n\n  Got toggle !!\n\n" );
 #ifdef	ENABLE_IO
 		togglePin( gpio );
-		return 1;
+		return NULL;
 #else	// ENABLE_IO
-		return 0;
+		return NULL;
 #endif	// ENABLE_IO
 	}
 
 	if ( 0 == strcmp( "guppy", command ) ) {	// test
 		printf( "\n\n  Got guppy !!\n\n" );
-		return 1;
+		return NULL;
 	}
 
 	if ( 0 == strcmp( "moosetrap", command ) ) {	// test
 		printf( "\n\n  Got moosetrap !!\n\n" );
-		return 1;
+		return NULL;
 	}
 
 	if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program is entered
@@ -54,7 +53,7 @@ int parseCommand( char *command ) {
 
 	printf( "  Not recognized in parseCommand: %s\n", command );
 
-	return 0;
+	return NULL;
 }
 
 // End of parser.c

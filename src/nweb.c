@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-	printf( "\nStarting web server process\n" );
+	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
 
 	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {

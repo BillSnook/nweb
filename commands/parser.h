@@ -9,7 +9,7 @@
 #define PARSER_H_
 
 
-int parseCommand( char *command );
+char *parseCommand( char *command );
 
 
 #endif /* PARSER_H_ */
