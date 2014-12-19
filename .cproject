@@ -112,7 +112,7 @@
 								<option id="gnu.c.compiler.option.include.paths.1830463347" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1231931500" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1231931500" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="ENABLE_IO"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.826279940" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -228,7 +228,14 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.501494873.src/web_src/index.html" name="index.html" rcbsApplicability="disable" resourcePath="src/web_src/index.html" toolsToInvoke=""/>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.501494873.src/web_src/index.html" name="index.html" rcbsApplicability="disable" resourcePath="src/web_src/index.html" toolsToInvoke="">
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1892551825" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1806818279" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1892885554" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.501494873.src/web_src/nweb.js" name="nweb.js" rcbsApplicability="disable" resourcePath="src/web_src/nweb.js" toolsToInvoke="">
 						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1450623121.1830934812" name="Resource Custom Build Step">
 							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.115822227.713865180" name="Resource Custom Build Step Input Type">

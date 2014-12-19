@@ -35,11 +35,12 @@ function loadDivObjWithPage( destDiv, dataPage ) {
 		divhttp.open( "GET", dataPage );
 		divhttp.onreadystatechange = function() {
 			if ( divhttp.readyState == 4 ) {
-				if ( divhttp.status == 200 ) {
+				// Non-html data sent from our nweb server is without headers so no status is delivered
+				if ( ( 200 == divhttp.status ) || ( 0 == divhttp.status ) ) {
 //					alert("In loadDivObjWithPage, got response " + divhttp.responseText);
 					destDiv.innerHTML = divhttp.responseText;
 				} else {
-					alert("In loadDivObjWithPage, status returned: " + divhttp.status + ", status text: " + divhttp.statusText );
+					alert("In loadDivObjWithPage, status returned: " + divhttp.status + ", status text: " + divhttp.statusText + ", response text: " + divhttp.responseText );
 				}
 			}
 		}
@@ -64,20 +65,21 @@ function setup_clock() {
 
 
 function show_clock() {
-	if ( !document.layers && !document.all && !document.getElementById )
-		return;
+//	if ( !document.layers && !document.all && !document.getElementById )
+//		return;
 		
-	var dayName = new Array ( "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" );
+	var dayName = new Array ( "Sun.", "Mon.", "Tue.", "Wed.", "Thurs.", "Fri.", "Sat." );
+//	var dayName = new Array ( "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" );
 	var monName = new Array ( "Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec." );
 	
-	var Digital = new Date();
+	var timeNow = new Date();
 	
-	var day = Digital.getDay();
-	var month = Digital.getMonth();
-	var date = Digital.getDate();
-	var hours = Digital.getHours();
-	var minutes = Digital.getMinutes();
-	var seconds = Digital.getSeconds();
+	var day = timeNow.getDay();			// Day of week
+	var month = timeNow.getMonth();
+	var date = timeNow.getDate();		// Date of day in month
+	var hours = timeNow.getHours();
+	var minutes = timeNow.getMinutes();
+	var seconds = timeNow.getSeconds();
 
 	var dn = "PM";
 	if ( hours < 12 )
@@ -105,3 +107,8 @@ function show_clock() {
 		document.getElementById( "liveclock").innerHTML = myclock;
 }
 
+
+//  ----    ----
+
+
+// End of nweb.js

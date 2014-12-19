@@ -29,7 +29,11 @@ void *monitorUserOps( void *arg ) {
 		scanf( "%s", command );
 		printf( "\nGot command: %s\n", command );
 
-		parseCommand( command );
+		char *response = parseCommand( command );
+		if ( NULL != response ) {
+			printf( "\n>>  %s\n", response );
+			free( response );
+		}
 	}
 
 	return NULL;

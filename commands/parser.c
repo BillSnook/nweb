@@ -35,20 +35,32 @@ char *parseCommand( char *command ) {
 #endif	// ENABLE_IO
 	}
 
-	if ( 0 == strcmp( "guppy", command ) ) {	// test
-		printf( "\n\n  Got guppy !!\n\n" );
+	if ( 0 == strcmp( "guppy", command ) ) {		// test
+		printf( "\n  Got guppy !!\n" );
 		return NULL;
 	}
 
-	if ( 0 == strcmp( "moosetrap", command ) ) {	// test
-		printf( "\n\n  Got moosetrap !!\n\n" );
+	if ( 0 == strcmp( "moosetrap", command ) ) {	// null command if empty uri entered
+		printf( "\n  Got moosetrap !!\n" );
 		return NULL;
 	}
 
-	if ( 0 == strcmp( "exit", command ) ) {		// If command to terminate this program is entered
+	if ( 0 == strcmp( "exit", command ) ) {			// If command to terminate this program is entered
 		printf( "\n\n  Got exit !!\n\n" );
-//		pthread_exit( NULL );					// Kill thread
-		exit( 1 );								// Kill program
+//		pthread_exit( NULL );						// Kill thread
+		exit( 1 );									// Kill program
+	}
+
+	if ( 0 == strcmp( "sample1", command ) ) {	// null command if empty uri entered
+
+		char *buffer = malloc( 1000 );
+		int sz = 0; // = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
+
+		// Here we sprintf the html contents for display
+		sz += sprintf( &buffer[sz], "Sample data from parser for command sample1" );
+
+//		sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
+		return buffer;
 	}
 
 	printf( "  Not recognized in parseCommand: %s\n", command );

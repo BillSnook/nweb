@@ -36,6 +36,7 @@ struct fileMap extensions [] = {
 	{"png", "image/png" },
 	{"ico", "image/ico" },
 	{"js",  "application/x-javascript" },
+	{"css", "text/css" },
 	{"zip", "image/zip" },
 	{"gz",  "image/gz"  },
 	{"tar", "image/tar" },
@@ -152,10 +153,11 @@ void doParse( int socketfd, char *commandString ) {
 	// Here we parse the command
 	char *returnData = parseCommand( commandString );
 	if ( returnData ) {
-		sprintf( buffer, html_header );
-		write( socketfd, buffer, strlen( buffer ) );
+//		sprintf( buffer, html_header );
+//		write( socketfd, buffer, strlen( buffer ) );
 
 		sprintf( buffer, returnData );
+		free( returnData );
 	} else {
 		// Here we create the response page
 //		sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line

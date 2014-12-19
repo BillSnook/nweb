@@ -2,19 +2,26 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<title>Edison Web Server Test</title>
+		<title>Edison Web Server</title>
 		<script src="nweb.js"></script>
-	</head>
+		<link rel=ÓstylesheetÓ type=Ótext/cssÓ href=Ònweb.cssÓ />
+</head>
 	<body>
 		<div id="Clock"><span id="liveclock"></span></div>
 		<script type="text/javascript">setup_clock()</script>
 
-		<h1>Have you heard these terms before?</h1>
-		<p>
-			Click to update, <a href="javascript:loadDivObjWithPage(description, 'sample.txt')">Click Here</a><br>
-		</p>
+		<h1>Edison Web Server</h1>
+		
+		<div class="sample">
+			<a href="javascript:loadDivObjWithPage(D1, 'sample.html')">Click to send command</a><br>
+		</div>
 
-		<div id="description"></div>
+		<div class="sample">
+			<a href="javascript:loadDivObjWithPage(D2, 'sample.html')">Click to send command</a><br>
+		</div>
+
+		<div id="D1">.</div>
+		<div id="D2">.</div>
 
 	</body>
 </html>
