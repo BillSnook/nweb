@@ -53,17 +53,18 @@ char *parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "sample1", command ) ) {	// null command if empty uri entered
 
+		printf( "  parse sample1\n" );
 		char *buffer = malloc( 1000 );
 		int sz = 0; // = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
 
 		// Here we sprintf the html contents for display
-		sz += sprintf( &buffer[sz], "Sample data from parser for command sample1" );
+		sz += sprintf( &buffer[sz], "Data from parser" );
 
 //		sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
 		return buffer;
 	}
 
-	printf( "  Not recognized in parseCommand: %s\n", command );
+	printf( "  not recognized in parseCommand: %s\n", command );
 
 	return NULL;
 }

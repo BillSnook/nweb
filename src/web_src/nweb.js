@@ -60,7 +60,7 @@ function setup_clock() {
 	
 //	alert( "In setup_clock, got " + bannerPane );
 	show_clock();
-	window.setInterval( "show_clock()", 1000 );
+	window.setInterval( "show_clock()", 1000 );	// Milliseconds - nominally 1 second for clock update
 }
 
 
@@ -107,6 +107,23 @@ function show_clock() {
 		document.getElementById( "liveclock").innerHTML = myclock;
 }
 
+
+//  ----    ----
+
+var monitorhttp = getOurXMLHttpRequest();
+var monitor
+
+function setup_monitor() {
+	
+//	alert( "In setup_monitor, got " + bannerPane );
+	show_clock();
+	window.setInterval( "show_monitor()", 1000 );	// Milliseconds - nominally 1 second for clock update
+}
+
+
+function show_clock() {
+		
+}
 
 //  ----    ----
 

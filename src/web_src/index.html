@@ -3,9 +3,9 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title>Edison Web Server</title>
+		<link rel="stylesheet" type="text/css" href="nweb.css"" />
 		<script src="nweb.js"></script>
-		<link rel=ÓstylesheetÓ type=Ótext/cssÓ href=Ònweb.cssÓ />
-</head>
+	</head>
 	<body>
 		<div id="Clock"><span id="liveclock"></span></div>
 		<script type="text/javascript">setup_clock()</script>
@@ -13,15 +13,19 @@
 		<h1>Edison Web Server</h1>
 		
 		<div class="sample">
-			<a href="javascript:loadDivObjWithPage(D1, 'sample.html')">Click to send command</a><br>
+			<a href="javascript:loadDivObjWithPage(D1, 'sample.html')">Click for sample.html</a><br>
 		</div>
+		<div id="D1" class="desc">.</div>
 
 		<div class="sample">
-			<a href="javascript:loadDivObjWithPage(D2, 'sample.html')">Click to send command</a><br>
+			<a href="javascript:loadDivObjWithPage(D2, 'sample.txt')">Click for sample.txt</a><br>
 		</div>
-
-		<div id="D1">.</div>
-		<div id="D2">.</div>
+		<div id="D2" class="desc">.</div>
+		
+		<div class="sample">
+			<a href="javascript:loadDivObjWithPage(D3, 'sample1')">Click for sample1 from Eddy1</a><br>
+		</div>
+		<div id="D3" class="desc">.</div>
 
 	</body>
 </html>

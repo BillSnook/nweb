@@ -148,13 +148,14 @@ void doParse( int socketfd, char *commandString ) {
 
 //	This variant extracts a string from the GET message
 //	It then tries to validate the string as a command and then to execute it
-	printf( "  received web command to parse:\n    %s\n", commandString );
+	printf( "  received web command to parse: %s\n", commandString );
 
 	// Here we parse the command
 	char *returnData = parseCommand( commandString );
 	if ( returnData ) {
-//		sprintf( buffer, html_header );
-//		write( socketfd, buffer, strlen( buffer ) );
+		sprintf( buffer, html_header );
+		write( socketfd, buffer, strlen( buffer ) );
+		printf( "  parse command returned: %s\n", returnData );
 
 		sprintf( buffer, returnData );
 		free( returnData );
@@ -184,18 +185,19 @@ void doParse( int socketfd, char *commandString ) {
 }
 
 
-// this is a web server thread, so we can log and pthread_exit on errors
+// this is a web server thread,
+//	spawned when data is received,
+//	so we can log and pthread_exit on errors
 void *webService( void *arg ) {
 	long i, j, ret;
 	char buffer[BUFSIZE+1];
-	extern char command[];	// Access commands entered from the command line
+	extern char command[];	// Access latest command entered from the command line
 
 	int file_fd, buflen, len;
 	char * fileType;
 	static char filePath[256];					// static so zero filled
 
-	printf( "\n" );
-//	pthread_detach( pthread_self() );
+//	printf( "\n" );
 
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;
@@ -203,6 +205,7 @@ void *webService( void *arg ) {
 	ret = read( webData->socketfd, buffer, BUFSIZE );  // read Web request in one go
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
+		printf( "\n  socket read failure, exit thread\n" );
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
 		close( webData->socketfd );
 		free( webData );
@@ -217,6 +220,7 @@ void *webService( void *arg ) {
 
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
+		printf( "\n  non-GET request received, exit thread\n" );
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
 		close( webData->socketfd );
 		free( webData );
@@ -241,6 +245,7 @@ void *webService( void *arg ) {
 
 	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
+			printf( "\n  invalid .. directory entry in request, exit thread\n" );
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
 			close( webData->socketfd );
 			free( webData );
@@ -251,8 +256,8 @@ void *webService( void *arg ) {
 //	This variant extracts the uri from the GET message
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )	// check for missing uri
-		strcpy( buffer, "GET /moosetrap" );										// default to index file or default command??
-//	strcpy( buffer, "GET /index.html" );										// default to index file or default command??
+		strcpy( buffer, "GET /moosetrap" );										// default to default null command??
+//	strcpy( buffer, "GET /index.html" );										// default to index file??
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );
@@ -274,33 +279,33 @@ void *webService( void *arg ) {
 		if ( ( file_fd = open( filePath, O_RDONLY ) ) != -1 ) {		// open file and check result
 			printf( "  found file at filePath: %s\n", filePath );
 			// Send response - only one for now
-//			nlog( LOG, "SEND", filePath, webData->hit );
+
 			len = (long)lseek( file_fd, (off_t)0, SEEK_END );		// lseek to the file end to find the length
 			lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
-		    sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
-//			nlog( LOG, "Header", buffer, webData->hit );
+		    sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // 1.1 Header + a blank line
+
 			write( webData->socketfd, buffer, strlen( buffer ) );
 
-//			sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// Shorter version, length not needed
+//			sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// 1.0 Shorter version, length not needed
 //			write( socketfd, buffer, strlen( buffer ) );
 
 			// send file in 8KB blocks - last block may be smaller
 			while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
 				write( socketfd, buffer, ret );			// write to client
 			}
-			printf( " done replying for file URI: %s\n", filePath );
+			printf( "  done replying for file URI: %s\n\n", filePath );
 		} else {													// open the file for reading
 //			nlog(NOTFOUND, "failed to open file",  filePath, webData->socketfd );
 			// Hidden command check here - file with recognized type not found
 			doParse( socketfd, &buffer[5] );
-			printf( "  done replying for file as command: %s\n", command );
+			printf( "  done replying for file as command: %s\n\n", command );
 		}
 
 	} else {
 //		nlog( FORBIDDEN, "file extension type not supported", buffer, webData->socketfd );
 		// Hidden command check here - unrecognized file name ending
 		doParse( socketfd, &buffer[5] );
-		printf( "  done replying to command: %s\n", command );
+		printf( "  done replying to command: %s\n\n", command );
 	}
 
 	close( webData->socketfd );

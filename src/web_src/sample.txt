@@ -1,1 +1,1 @@
-Sample description text
+sample.txt description <blink>text</blink>
