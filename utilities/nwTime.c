@@ -23,15 +23,22 @@ double start = 0.0;
 void startElapsedTime() {
 
 	start = clock();
-//    fprintf(stdout, "\nStart time %ld\n", start);
+//    printf( "\nStart time %ld\n", start );
 
 }
+
 
 double getElapsedTime() {
 
 	double end = clock();
-//	fprintf(stdout, "End time %ld\nElapsed time %f\n", end, ( ((double) (end - start)) / CLOCKS_PER_SEC ));
+//	printf( "End time %ld\nElapsed time %f\n", end, ( ((double) (end - start)) / CLOCKS_PER_SEC ));
 	return( ((double) (end - start)) / CLOCKS_PER_SEC );
+}
+
+
+double getTimeCheck() {
+
+	return( clock() );
 }
 
 // End of nwTime.c

@@ -16,6 +16,7 @@
 
 
 mraa_gpio_context gpio;
+mraa_gpio_context isro;
 mraa_pwm_context pwmo;
 
 
@@ -34,6 +35,12 @@ void closeGPIO(  mraa_gpio_context gpio );
 mraa_pwm_context setupPWMO( int pinNumber );
 
 void closePWMO(  mraa_pwm_context pwmo );
+
+
+// Interrupt Service trigger pin control
+mraa_result_t setupISRO( int pinNumber );
+
+void closeISRO(  mraa_gpio_context isro );
 
 
 void closeMRAA( void );

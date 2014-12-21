@@ -11,6 +11,7 @@
 
 void startElapsedTime();
 double getElapsedTime();
+double getTimeCheck();
 
 
 #endif /* NWTIME_HPP_ */

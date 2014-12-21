@@ -9,16 +9,22 @@
 #include <stdio.h>
 
 #include "nwInterface.h"
+#include "nwTime.h"
 
 #ifdef	ENABLE_IO
 
 int response;
 int iopin;
 int on;
+int isrState;
 
 int adc_value;
 
+double last = 0.0;
+
+
 extern	mraa_gpio_context gpio;
+extern	mraa_gpio_context isro;
 extern	mraa_pwm_context pwmo;
 
 
@@ -117,7 +123,49 @@ void closePWMO( mraa_pwm_context pwmo ) {
 }
 
 
-// Finally done with it
+void isr( void *arg ) {
+
+	double diff = ((double) (lastTime - getTimeCheck()));
+	printf( "Interrupt, diff: %f", diff );
+	lastTime = thisTime;
+}
+
+
+// mraa_result_t mraa_gpio_isr(mraa_gpio_context dev, gpio_edge_t edge, void (*fptr)(void *), void * args);
+
+// mraa_result_t mraa_gpio_isr_exit(mraa_gpio_context dev);
+
+mraa_result_t setupISRO( int pinNumber ) {
+
+    on = 0;
+
+    isro = mraa_gpio_init( pinNumber );
+    if ( ! isro ) {
+        printf( "  Failed initing isro\n" );
+        mraa_result_print( MRAA_ERROR_UNSPECIFIED );
+    	return 0;
+//    } else {
+//        printf( "  Inited isro: %p\n", gpio );
+    }
+
+    response = mraa_gpio_dir( isro, MRAA_GPIO_IN );
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting isro pin direction\n" );
+        mraa_result_print((mraa_result_t) response);
+        return 0;
+    }
+   	return mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr(void *), NULL);
+}
+
+
+void closeISRO( mraa_gpio_context isro ) {
+
+	mraa_gpio_isr_exit( isro );
+}
+
+
+
+// Finally done, exiting
 void closeMRAA( void ) {
 
 	mraa_deinit();

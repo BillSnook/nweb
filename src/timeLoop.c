@@ -23,6 +23,7 @@
 #include "../utilities/nwInterface.h"
 
 extern	mraa_gpio_context gpio;
+extern	mraa_gpio_context isro;
 
 #define	DEFAULT_LOOP_TIME	1.0
 
@@ -51,6 +52,7 @@ void *monitorTimeOps( void *arg ) {
 #ifdef	ENABLE_IO
     startMRAA();
 	setupGPIO( 13 );
+	setupISRO( 14 );
 #endif	// ENABLE_IO
 
 	startElapsedTime();
@@ -68,6 +70,7 @@ void *monitorTimeOps( void *arg ) {
     }
 
 #ifdef	ENABLE_IO
+    closeISRO( isro );
     closeGPIO( gpio );
 
     closeMRAA();
