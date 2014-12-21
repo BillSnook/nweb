@@ -23,6 +23,15 @@ extern	mraa_gpio_context gpio;
 //--	----	----	----
 
 
+char *getADCData( void ) {
+
+	return NULL;
+}
+
+
+//--	----	----	----
+
+
 char *parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "toggle", command ) ) {
@@ -64,9 +73,15 @@ char *parseCommand( char *command ) {
 		return buffer;
 	}
 
+	if ( 0 == strcmp( "adcData1", command ) ) {	// null command if empty uri entered
+		printf( "\n  Got adcData1 !!\n" );
+		return getADCData();
+	}
+
 	printf( "  not recognized in parseCommand: %s\n", command );
 
 	return NULL;
 }
+
 
 // End of parser.c
