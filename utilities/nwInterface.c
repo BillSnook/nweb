@@ -20,7 +20,7 @@ int isrState;
 
 int adc_value;
 
-double last = 0.0;
+double lastTime = 0.0;
 
 
 extern	mraa_gpio_context gpio;
@@ -125,7 +125,8 @@ void closePWMO( mraa_pwm_context pwmo ) {
 
 void isr( void *arg ) {
 
-	double diff = ((double) (lastTime - getTimeCheck()));
+	double thisTime = getTimeCheck();
+	double diff = ((double) (lastTime - thisTime));
 	printf( "Interrupt, diff: %f", diff );
 	lastTime = thisTime;
 }
@@ -154,7 +155,7 @@ mraa_result_t setupISRO( int pinNumber ) {
         mraa_result_print((mraa_result_t) response);
         return 0;
     }
-   	return mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr(void *), NULL);
+   	return mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr, NULL);
 }
 
 

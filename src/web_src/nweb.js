@@ -58,17 +58,19 @@ function loadDivObjWithPage( destDiv, dataPage ) {
 
 function setup_clock() {
 	
-//	alert( "In setup_clock, got " + bannerPane );
+//	alert( "In setup_clock" );
 	show_clock();
-	window.setInterval( "show_clock()", 1000 );	// Milliseconds - nominally 1 second for clock update
+	window.setInterval( "show_clock()", 1000 );
+// Milliseconds - nominally 1 second for clock update
 }
 
 
 function show_clock() {
+//	alert( "In show_clock" );
 //	if ( !document.layers && !document.all && !document.getElementById )
 //		return;
-		
-	var dayName = new Array ( "Sun.", "Mon.", "Tue.", "Wed.", "Thurs.", "Fri.", "Sat." );
+	
+	var dayName = new Array ( "Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat" );
 //	var dayName = new Array ( "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" );
 	var monName = new Array ( "Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec." );
 	
@@ -94,17 +96,17 @@ function show_clock() {
 	if ( seconds <= 9 )
 		seconds = "0" + seconds;
 	//change font size here to your desire
-	var myclock = dayName[ day ] + ", " + monName[ month ] + " " + date + ", ";
-	myclock += hours + ":" + minutes + ":" + seconds + " " + dn + "</b>";
-	if ( document.layers ) {
-		document.layers.liveclock.document.write( myclock );
-		document.layers.liveclock.document.close();
-	} else
-	if ( document.all )
+	var myclock = "<b>" + dayName[ day ] + "&nbsp;&nbsp;&nbsp;" + monName[ month ] + " " + date + "&nbsp;&nbsp;&nbsp;";
+	myclock += hours + ":" + minutes + ":" + seconds + "&nbsp;&nbsp;" + dn + "</b>";
+//	if ( document.layers ) {
+//		document.layers.liveclock.document.write( myclock );
+//		document.layers.liveclock.document.close();
+//	} else
+//	if ( document.all )
 		liveclock.innerHTML = myclock;
-	else
-	if ( document.getElementById )
-		document.getElementById( "liveclock").innerHTML = myclock;
+//	else
+//	if ( document.getElementById )
+//		document.getElementById( "liveclock").innerHTML = myclock;
 }
 
 
@@ -121,7 +123,7 @@ function setup_monitor() {
 }
 
 
-function show_clock() {
+function show_monitor() {
 		
 }
 
