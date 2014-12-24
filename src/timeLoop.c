@@ -50,9 +50,12 @@ void *monitorTimeOps( void *arg ) {
     double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifdef	ENABLE_IO
+    mraa_gpio_context gpio;
+    mraa_gpio_context isro;
+
     startMRAA();
-	setupGPIO( 13 );
-	setupISRO( 14 );
+    gpio = setupGPIO( 13 );
+    isro = setupISRO( 12 );
 #endif	// ENABLE_IO
 
 	startElapsedTime();
@@ -61,7 +64,7 @@ void *monitorTimeOps( void *arg ) {
     		startElapsedTime();
 
 #ifdef	ENABLE_IO
-//    		togglePin( gpio );
+    		togglePin( gpio );
 #else	// ENABLE_IO
 //        	printf( "\n    Tick\n" );
 #endif	// ENABLE_IO

@@ -99,19 +99,19 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
 
     pwmo = mraa_pwm_init( pinNumber );
     if ( ! pwmo ) {
-        printf( "  Failed initing gpio\n" );
+        printf( "  Failed initing pwmo\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
-//    } else {
-//        printf( "  Inited gpio: %p\n", gpio );
+    } else {
+        printf( "  Inited pwmo: %p\n", gpio );
     }
 
-//    response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
-//    if (response != MRAA_SUCCESS) {
-//        printf( "  Failed setting gpio pin direction\n" );
-//        mraa_result_print((mraa_result_t) response);
-//        return 0;
-//    }
+    response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting pwmo pin direction\n" );
+        mraa_result_print((mraa_result_t) response);
+        return 0;
+    }
 
    	return pwmo;
 }
@@ -123,30 +123,20 @@ void closePWMO( mraa_pwm_context pwmo ) {
 }
 
 
-void isr( void *arg ) {
-
-	double thisTime = getTimeCheck();
-	double diff = ((double) (lastTime - thisTime));
-	printf( "Interrupt, diff: %f", diff );
-	lastTime = thisTime;
-}
-
 
 // mraa_result_t mraa_gpio_isr(mraa_gpio_context dev, gpio_edge_t edge, void (*fptr)(void *), void * args);
 
 // mraa_result_t mraa_gpio_isr_exit(mraa_gpio_context dev);
 
-mraa_result_t setupISRO( int pinNumber ) {
-
-    on = 0;
+mraa_gpio_context setupISRO( int pinNumber ) {
 
     isro = mraa_gpio_init( pinNumber );
     if ( ! isro ) {
         printf( "  Failed initing isro\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
-//    } else {
-//        printf( "  Inited isro: %p\n", gpio );
+    } else {
+        printf( "  Inited isro on pin: %d\n", pinNumber );
     }
 
     response = mraa_gpio_dir( isro, MRAA_GPIO_IN );
@@ -155,7 +145,21 @@ mraa_result_t setupISRO( int pinNumber ) {
         mraa_result_print((mraa_result_t) response);
         return 0;
     }
-   	return mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr, NULL);
+    printf( "  Setup isro pin direction to IN\n" );
+    mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr1, NULL);
+
+    if ( MRAA_SUCCESS == result ) {
+        printf( "  Setup isro interrupt service routine\n" );
+
+        {	// Init to test pin level
+        lastTime = getTimeCheck();
+        isr1( NULL );				// Check level
+        }
+    } else {
+        printf( "  Setup isro interrupt service routine failed with result: %d\n", result );
+    }
+
+ 	return isro;
 }
 
 
@@ -164,6 +168,17 @@ void closeISRO( mraa_gpio_context isro ) {
 	mraa_gpio_isr_exit( isro );
 }
 
+
+void isr1( void *arg ) {
+
+	double thisTime = getTimeCheck();
+	double diff = ((double) (thisTime - lastTime) * 2);
+
+	int readInput =  mraa_gpio_read( isro );
+
+	printf( "Interrupt1, state: %d, diff: %.2f uSec\n", readInput, diff );
+	lastTime = thisTime;
+}
 
 
 // Finally done, exiting

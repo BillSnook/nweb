@@ -25,7 +25,12 @@ extern	mraa_gpio_context gpio;
 
 char *getADCData( void ) {
 
+#ifdef	ENABLE_IO
+	togglePin( gpio );
 	return NULL;
+#else	// ENABLE_IO
+	return NULL;
+#endif	// ENABLE_IO
 }
 
 
@@ -74,11 +79,11 @@ char *parseCommand( char *command ) {
 	}
 
 	if ( 0 == strcmp( "adcData1", command ) ) {	// null command if empty uri entered
-		printf( "\n  Got adcData1 !!\n" );
+		printf( "  Got adcData1\n" );
 		return getADCData();
 	}
 
-	printf( "  not recognized in parseCommand: %s\n", command );
+	printf( "  command not recognized in parseCommand: %s\n", command );
 
 	return NULL;
 }

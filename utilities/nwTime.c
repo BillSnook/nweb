@@ -15,8 +15,6 @@
 #include "nwTime.h"
 
 
-#define	CLOCK_RATE		500000		// Clocks per second, ~500000Hz
-
 double start = 0.0;
 
 
