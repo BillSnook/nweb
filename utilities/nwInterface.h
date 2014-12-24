@@ -34,6 +34,8 @@ void closeGPIO(  mraa_gpio_context gpio );
 // Pulse Width Modulated pin control
 mraa_pwm_context setupPWMO( int pinNumber );
 
+void setDutyCycle( mraa_pwm_context pwmo, float dutyCycle );
+
 void closePWMO(  mraa_pwm_context pwmo );
 
 

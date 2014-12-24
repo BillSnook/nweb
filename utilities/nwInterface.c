@@ -103,23 +103,55 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
     } else {
-        printf( "  Inited pwmo: %p\n", gpio );
+        printf( "  Inited pwmo for pin %d\n", pinNumber );
     }
 
+/*
     response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
     if (response != MRAA_SUCCESS) {
         printf( "  Failed setting pwmo pin direction\n" );
         mraa_result_print((mraa_result_t) response);
         return 0;
     }
+*/
 
+    response = mraa_pwm_enable( pwmo, 0 );					// Initially off
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting pwmo enable to off during setup\n" );
+        mraa_result_print((mraa_result_t) response);
+        return 0;
+    }
+    response = mraa_pwm_config_percent( pwmo, 100, 0.25 );	// Startup settings, 0.1 second, 50% duty cycle
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting pwmo period and duty cycle\n" );
+        mraa_result_print((mraa_result_t) response);
+        return 0;
+    }
+    response = mraa_pwm_enable( pwmo, 1 );					// Now enable it
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting pwmo enable to on during setup\n" );
+        mraa_result_print((mraa_result_t) response);
+        return 0;
+    }
    	return pwmo;
+}
+
+
+void setDutyCycle( mraa_pwm_context pwmo, float dutyCycle ) {
+
+
 }
 
 
 void closePWMO( mraa_pwm_context pwmo ) {
 
-	mraa_pwm_close( pwmo );
+    response = mraa_pwm_enable( pwmo, 0 );					// Set to off
+    if (response != MRAA_SUCCESS) {
+        printf( "  Failed setting pwmo enable to off when closing output\n" );
+        mraa_result_print((mraa_result_t) response);
+    } else {
+    	mraa_pwm_close( pwmo );
+    }
 }
 
 

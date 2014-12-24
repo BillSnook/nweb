@@ -9,6 +9,9 @@
 #define TIMELOOP_H_
 
 
+int		running;
+
+
 void *monitorTimeOps( void *arg );
 void sig_handler(int signo);
 

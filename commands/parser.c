@@ -13,11 +13,14 @@
 
 #include "parser.h"
 
+#include "../src/timeLoop.h"
 #include "../utilities/nwInterface.h"
 
 #ifdef	ENABLE_IO
 extern	mraa_gpio_context gpio;
 #endif	// ENABLE_IO
+
+extern int		running;
 
 
 //--	----	----	----
@@ -62,7 +65,9 @@ char *parseCommand( char *command ) {
 	if ( 0 == strcmp( "exit", command ) ) {			// If command to terminate this program is entered
 		printf( "\n\n  Got exit !!\n\n" );
 //		pthread_exit( NULL );						// Kill thread
-		exit( 1 );									// Kill program
+//		exit( 1 );									// Kill program
+		running = 1;
+		return NULL;
 	}
 
 	if ( 0 == strcmp( "sample1", command ) ) {	// null command if empty uri entered

@@ -24,8 +24,9 @@
 
 extern	mraa_gpio_context gpio;
 extern	mraa_gpio_context isro;
+extern	mraa_pwm_context  pwmo;
 
-#define	DEFAULT_LOOP_TIME	1.0
+#define	DEFAULT_LOOP_TIME	2.0
 
 #else	// ENABLE_IO
 
@@ -34,7 +35,7 @@ extern	mraa_gpio_context isro;
 #endif	// ENABLE_IO
 
 
-int		running = 0;
+extern int		running;
 
 
 void *monitorTimeOps( void *arg ) {
@@ -45,17 +46,22 @@ void *monitorTimeOps( void *arg ) {
 
 //	printf( "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
+	running = 0; 							// Enable run loop
+
     signal(SIGINT, sig_handler);
 
     double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifdef	ENABLE_IO
+    double dutyCycle = 0.2;					// Portion of time output is on
     mraa_gpio_context gpio;
     mraa_gpio_context isro;
+    mraa_pwm_context  pwmo;
 
     startMRAA();
     gpio = setupGPIO( 13 );
     isro = setupISRO( 12 );
+    pwmo = setupPWMO( 3 );
 #endif	// ENABLE_IO
 
 	startElapsedTime();
@@ -64,7 +70,11 @@ void *monitorTimeOps( void *arg ) {
     		startElapsedTime();
 
 #ifdef	ENABLE_IO
+
     		togglePin( gpio );
+    		setDutyCycle( pwmo, dutyCycle );
+    		dutyCycle = 1.0 - dutyCycle;
+
 #else	// ENABLE_IO
 //        	printf( "\n    Tick\n" );
 #endif	// ENABLE_IO
@@ -73,6 +83,7 @@ void *monitorTimeOps( void *arg ) {
     }
 
 #ifdef	ENABLE_IO
+    closePWMO( pwmo );
     closeISRO( isro );
     closeGPIO( gpio );
 
