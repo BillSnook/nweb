@@ -16,9 +16,9 @@
 #include "../src/timeLoop.h"
 #include "../utilities/nwInterface.h"
 
-#ifdef	ENABLE_IO
+#ifndef	DISABLE_IO
 extern	mraa_gpio_context gpio;
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
 extern int		running;
 
@@ -28,12 +28,12 @@ extern int		running;
 
 char *getADCData( void ) {
 
-#ifdef	ENABLE_IO
+#ifdef	DISABLE_IO
+	return NULL;
+#else	// DISABLE_IO
 	togglePin( gpio );
 	return NULL;
-#else	// ENABLE_IO
-	return NULL;
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 }
 
 
@@ -44,12 +44,12 @@ char *parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "toggle", command ) ) {
 		printf( "\n\n  Got toggle !!\n\n" );
-#ifdef	ENABLE_IO
+#ifdef	DISABLE_IO
+		return NULL;
+#else	// DISABLE_IO
 		togglePin( gpio );
 		return NULL;
-#else	// ENABLE_IO
-		return NULL;
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 	}
 
 	if ( 0 == strcmp( "guppy", command ) ) {		// test

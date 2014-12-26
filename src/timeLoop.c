@@ -18,21 +18,21 @@
 #include "../utilities/nwTime.h"
 
 
-#ifdef	ENABLE_IO
-
-#include "../utilities/nwInterface.h"
-
-extern	mraa_gpio_context gpio;
-extern	mraa_gpio_context isro;
-extern	mraa_pwm_context  pwmo;
-
-#define	DEFAULT_LOOP_TIME	2.0
-
-#else	// ENABLE_IO
+#ifdef	DISABLE_IO
 
 #define	DEFAULT_LOOP_TIME	10.0
 
-#endif	// ENABLE_IO
+#else	// DISABLE_IO
+
+#include "../utilities/nwInterface.h"
+
+//extern	mraa_gpio_context gpio;
+//extern	mraa_gpio_context isro;
+//extern	mraa_pwm_context  pwmo;
+
+#define	DEFAULT_LOOP_TIME	2.0
+
+#endif	// DISABLE_IO
 
 
 extern int		running;
@@ -52,7 +52,7 @@ void *monitorTimeOps( void *arg ) {
 
     double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
-#ifdef	ENABLE_IO
+#ifndef	DISABLE_IO
     double dutyCycle = 0.2;					// Portion of time output is on
     mraa_gpio_context gpio;
     mraa_gpio_context isro;
@@ -62,33 +62,33 @@ void *monitorTimeOps( void *arg ) {
     gpio = setupGPIO( 13 );
     isro = setupISRO( 12 );
     pwmo = setupPWMO( 3 );
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
 	startElapsedTime();
     while ( running == 0 ) {
     	if ( getElapsedTime() > timeCheck ) {
     		startElapsedTime();
 
-#ifdef	ENABLE_IO
+#ifdef	DISABLE_IO
+//        	printf( "\n    Tick\n" );
+#else	// DISABLE_IO
 
     		togglePin( gpio );
     		setDutyCycle( pwmo, dutyCycle );
     		dutyCycle = 1.0 - dutyCycle;
 
-#else	// ENABLE_IO
-//        	printf( "\n    Tick\n" );
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
     	}
     }
 
-#ifdef	ENABLE_IO
+#ifndef	DISABLE_IO
     closePWMO( pwmo );
     closeISRO( isro );
     closeGPIO( gpio );
 
     closeMRAA();
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
 	exit( 1 );						// Exit program when told to quit via cntl-C
 

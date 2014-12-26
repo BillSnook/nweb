@@ -112,9 +112,7 @@
 								<option id="gnu.c.compiler.option.include.paths.1830463347" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include"/>
 								</option>
-								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1231931500" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="ENABLE_IO"/>
-								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1231931500" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.826279940" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
@@ -128,6 +126,7 @@
 									<listOptionValue builtIn="false" value="&quot;${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include/c++/bits&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include/mraa&quot;"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.938102509" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.4041490" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.377034703" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
@@ -192,6 +191,9 @@
 								<option id="gnu.c.compiler.option.dialect.std.1665986036" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1210643999" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include"/>
+								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1099327995" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="DISABLE_IO"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1241890720" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

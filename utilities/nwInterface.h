@@ -10,7 +10,7 @@
 #define NWINTERFACE_H_
 
 
-#ifdef	ENABLE_IO
+#ifndef	DISABLE_IO
 
 #include "mraa.h"
 
@@ -49,7 +49,7 @@ void isr1( void *arg );
 void closeMRAA( void );
 
 
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
 
 #endif /* NWINTERFACE_H_ */

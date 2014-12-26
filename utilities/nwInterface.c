@@ -11,7 +11,7 @@
 #include "nwInterface.h"
 #include "nwTime.h"
 
-#ifdef	ENABLE_IO
+#ifndef	DISABLE_IO
 
 int response;
 int iopin;
@@ -102,18 +102,7 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
         printf( "  Failed initing pwmo\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
-    } else {
-        printf( "  Inited pwmo for pin %d\n", pinNumber );
     }
-
-/*
-    response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
-    if (response != MRAA_SUCCESS) {
-        printf( "  Failed setting pwmo pin direction\n" );
-        mraa_result_print((mraa_result_t) response);
-        return 0;
-    }
-*/
 
     response = mraa_pwm_enable( pwmo, 0 );					// Initially off
     if (response != MRAA_SUCCESS) {
@@ -133,6 +122,8 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
         mraa_result_print((mraa_result_t) response);
         return 0;
     }
+
+    printf( "  Inited pwmo for pin %d\n", pinNumber );
    	return pwmo;
 }
 
@@ -219,7 +210,7 @@ void closeMRAA( void ) {
 	mraa_deinit();
 }
 
-#endif	// ENABLE_IO
+#endif	// DISABLE_IO
 
 // End of nwInterface.c
 
