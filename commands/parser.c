@@ -43,7 +43,7 @@ char *getADCData( void ) {
 char *parseCommand( char *command ) {
 
 	if ( 0 == strcmp( "toggle", command ) ) {
-		printf( "\n\n  Got toggle !!\n\n" );
+		printf( "\n  Got toggle !!\n" );
 #ifdef	DISABLE_IO
 		return NULL;
 #else	// DISABLE_IO

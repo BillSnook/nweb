@@ -97,7 +97,7 @@ void *monitorTimeOps( void *arg ) {
 
 
 void sig_handler(int signo) {
-    if (signo == SIGINT) {
+    if (signo == SIGINT) {			// Typically control-C
         printf("\n\n        Closing IO nicely\n\n");
         running = -1;
     }

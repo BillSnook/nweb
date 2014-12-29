@@ -70,19 +70,31 @@ int main(int argc, char **argv) {
 	if ((pid = fork()) < 0) {
 		nlog( ERROR, "system call", "fork", 0 );
 	} else {
-		if ( pid > 0 ) {						// parent
-			return 0;							// parent returns OK to shell
+		if ( pid > 0 ) {					// parent
+			return 0;						// parent returns OK to shell
 		}
 	}
 
 	// child
 	for (i = 0; i < 32; i++ )
-		close( i );						// close open files (such as i/o)
+		close( i );							// close open files (such as i/o)
 
-	setpgrp();							// break away from process group
+	setpgrp();								// break away from process group so that
+											//  exiting terminal/login won't kill this program
 
 	signal(SIGCHLD, SIG_IGN);				// ignore child death
 	signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
+
+#else	// BECOME_ZOMBIE
+
+	// we want to start a new thread to monitor our user input processes
+	// this only makes sense if we are not a zombie/daemon
+	pthread_t pThreadUser;	// this is our thread identifier
+	int resultUser = pthread_create( &pThreadUser, NULL, monitorUserOps, "param2" );
+	if ( 0 != resultUser ) {
+		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create 2", 0 );	// returns failure to shell
+	}
 
 #endif	// BECOME_ZOMBIE
 
@@ -92,14 +104,6 @@ int main(int argc, char **argv) {
 	if ( 0 != resultTime ) {
 		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
 		nlog( ERROR, "system call", "pthread_create 1", 0 );	// returns failure to shell
-	}
-
-	// we want to start a new thread to monitor our user input processes
-	pthread_t pThreadUser;	// this is our thread identifier
-	int resultUser = pthread_create( &pThreadUser, NULL, monitorUserOps, "param2" );
-	if ( 0 != resultUser ) {
-		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 2", 0 );	// returns failure to shell
 	}
 
 	// setup the network socket

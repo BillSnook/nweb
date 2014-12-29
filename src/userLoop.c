@@ -27,11 +27,11 @@ void *monitorUserOps( void *arg ) {
 	while ( 1 ) {
 		printf( "\nCommand: " );
 		scanf( "%s", command );
-		printf( "\nGot command: %s\n", command );
+		printf( "Got command: %s\n", command );
 
 		char *response = parseCommand( command );
 		if ( NULL != response ) {
-			printf( "\n>>  %s\n", response );
+			printf( ">>  %s\n", response );
 			free( response );
 		}
 	}
