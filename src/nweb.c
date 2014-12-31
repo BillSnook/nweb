@@ -43,9 +43,8 @@ char	*baseDirectory;
 int main(int argc, char **argv) {
 	int port, listenfd, socketfd, hit, bound;
 	size_t length;
-//	char *str;
-	static struct sockaddr_in cli_addr;		// static = initialised to zeros
-	static struct sockaddr_in serv_addr;	// static = initialised to zeros
+	static struct sockaddr_in cli_addr;		// static = initialized to zeros
+	static struct sockaddr_in serv_addr;	// static = initialized to zeros
 
 	if ( argc < 3 || argc > 3 || !strcmp(argv[1], "-?") ) {
 		printWebHelp();

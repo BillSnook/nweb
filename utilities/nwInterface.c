@@ -42,11 +42,11 @@ void startMRAA( void ) {
 }
 
 
-mraa_gpio_context setupGPIO( int pinNumber ) {
+mraa_gpio_context setupGPIOOut( int pinNumber ) {
 
     on = 0;
 
-    gpio = mraa_gpio_init( pinNumber );
+    mraa_gpio_context gpio = mraa_gpio_init( pinNumber );
     if ( ! gpio ) {
         printf( "  Failed initing gpio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
@@ -66,7 +66,7 @@ mraa_gpio_context setupGPIO( int pinNumber ) {
 }
 
 
-void togglePin(  mraa_gpio_context gpio ) {
+void togglePin( mraa_gpio_context gpio ) {
 
 	response = mraa_gpio_write( gpio, on );
     if (response != MRAA_SUCCESS) {
@@ -97,7 +97,7 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
 
     on = 0;
 
-    pwmo = mraa_pwm_init( pinNumber );
+    mraa_pwm_context pwmo = mraa_pwm_init( pinNumber );
     if ( ! pwmo ) {
         printf( "  Failed initing pwmo\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
@@ -153,7 +153,7 @@ void closePWMO( mraa_pwm_context pwmo ) {
 
 mraa_gpio_context setupISRO( int pinNumber ) {
 
-    isro = mraa_gpio_init( pinNumber );
+	mraa_gpio_context isro = mraa_gpio_init( pinNumber );
     if ( ! isro ) {
         printf( "  Failed initing isro\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
@@ -169,7 +169,7 @@ mraa_gpio_context setupISRO( int pinNumber ) {
         return 0;
     }
     printf( "  Setup isro pin direction to IN\n" );
-    mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr1, NULL);
+    mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr1, isro);
 
     if ( MRAA_SUCCESS == result ) {
         printf( "  Setup isro interrupt service routine\n" );
@@ -180,6 +180,7 @@ mraa_gpio_context setupISRO( int pinNumber ) {
         }
     } else {
         printf( "  Setup isro interrupt service routine failed with result: %d\n", result );
+        return 0;
     }
 
  	return isro;
@@ -194,6 +195,7 @@ void closeISRO( mraa_gpio_context isro ) {
 
 void isr1( void *arg ) {
 
+	mraa_gpio_context isro = (mraa_gpio_context)arg;
 	double thisTime = getTimeCheck();
 	double diff = ((double) (thisTime - lastTime) * 2);
 

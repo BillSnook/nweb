@@ -26,9 +26,9 @@
 
 #include "../utilities/nwInterface.h"
 
-//extern	mraa_gpio_context gpio;
-//extern	mraa_gpio_context isro;
-//extern	mraa_pwm_context  pwmo;
+extern	mraa_gpio_context gpio;
+extern	mraa_gpio_context isro;
+extern	mraa_pwm_context  pwmo;
 
 #define	DEFAULT_LOOP_TIME	2.0
 
@@ -53,15 +53,15 @@ void *monitorTimeOps( void *arg ) {
     double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifndef	DISABLE_IO
-    double dutyCycle = 0.2;					// Portion of time output is on
-    mraa_gpio_context gpio;
-    mraa_gpio_context isro;
-    mraa_pwm_context  pwmo;
+//    double dutyCycle = 0.2;					// Portion of time output is on
+//    mraa_gpio_context gpio;
+//    mraa_gpio_context isro;
+//    mraa_pwm_context  pwmo;
 
     startMRAA();
-    gpio = setupGPIO( 13 );
-    isro = setupISRO( 12 );
-    pwmo = setupPWMO( 3 );
+    gpio = setupGPIOOut( 13 );
+//    isro = setupISRO( 12 );
+//    pwmo = setupPWMO( 3 );
 #endif	// DISABLE_IO
 
 	startElapsedTime();
@@ -74,8 +74,8 @@ void *monitorTimeOps( void *arg ) {
 #else	// DISABLE_IO
 
     		togglePin( gpio );
-    		setDutyCycle( pwmo, dutyCycle );
-    		dutyCycle = 1.0 - dutyCycle;
+//    		setDutyCycle( pwmo, dutyCycle );
+//    		dutyCycle = 1.0 - dutyCycle;
 
 #endif	// DISABLE_IO
 
@@ -83,8 +83,8 @@ void *monitorTimeOps( void *arg ) {
     }
 
 #ifndef	DISABLE_IO
-    closePWMO( pwmo );
-    closeISRO( isro );
+//    closePWMO( pwmo );
+//    closeISRO( isro );
     closeGPIO( gpio );
 
     closeMRAA();

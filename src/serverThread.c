@@ -195,7 +195,6 @@ void *webService( void *arg ) {
 
 	int file_fd, buflen, len;
 	char * fileType;
-	static char filePath[256];					// static so zero filled
 
 //	printf( "\n" );
 
@@ -272,6 +271,7 @@ void *webService( void *arg ) {
 	}
 	if ( fileType != 0 ) {				// Found extent type that we support
 		// investigate file name, handle it
+		char filePath[256];
 		sprintf( filePath, "%s/%s", webData->baseDirectory, &buffer[5]);
 		printf( "  got filePath: %s\n", filePath );
 
