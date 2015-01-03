@@ -46,19 +46,26 @@ int main(int argc, char **argv) {
 	static struct sockaddr_in cli_addr;		// static = initialized to zeros
 	static struct sockaddr_in serv_addr;	// static = initialized to zeros
 
-	if ( argc < 3 || argc > 3 || !strcmp(argv[1], "-?") ) {
+	if ( argc > 3 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "-h") ) {
 		printWebHelp();
 		exit( 0 );
 	}
 
-	baseDirectory = argv[2];
+	if ( argc == 3 ) {
+		port = atoi(argv[1]);
+		baseDirectory = argv[2];
+	} else {
+		port = 80;
+		baseDirectory = "/home/root/Code/Test/web_src";
+	}
+
 	if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
 		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
 		exit(3);
 	}
 
-	if ( chdir(argv[2]) == -1 ) {
-		printf("ERROR: Can't Change to directory in second argument: %s\n",argv[2]);
+	if ( chdir(baseDirectory) == -1 ) {
+		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
 		exit(4);
 	}
 
@@ -109,7 +116,6 @@ int main(int argc, char **argv) {
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
 		nlog( ERROR, "system call", "socket", 0 );
 
-	port = atoi(argv[1]);
 	if ( port < 0 || port > 60000 )
 		nlog( ERROR, "Invalid port number (try 1->60000)", argv[1], 0 );
 

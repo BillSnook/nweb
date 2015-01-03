@@ -27,8 +27,8 @@
 #include "../utilities/nwInterface.h"
 
 extern	mraa_gpio_context gpio;
-extern	mraa_gpio_context isro;
-extern	mraa_pwm_context  pwmo;
+//extern	mraa_gpio_context isro;
+//extern	mraa_pwm_context  pwmo;
 
 #define	DEFAULT_LOOP_TIME	2.0
 

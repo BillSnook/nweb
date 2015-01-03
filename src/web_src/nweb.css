@@ -38,3 +38,28 @@ div.desc {
 	text-align: center;
 	margin: 0 auto;
 }
+
+div.buttonContainer {
+	position: relative;
+	width:150px;
+	height: 60px;
+	line-height: 20px;
+	text-align: center;
+	margin: 0 auto;
+}
+
+div.buttonText {
+	position: relative;
+	width: 150px;
+	height: 20px;
+	line-height: 20px;
+	text-align: center;
+	margin: 0 auto;
+}
+
+div.buttonBox {
+	position: relative;
+	width: 120px;
+	height: 36px;
+	margin: 0 auto;
+}

@@ -24,6 +24,8 @@ void startMRAA( void );
 
 // General purpose I/O operations
 mraa_gpio_context setupGPIOOut( int pinNumber );
+mraa_gpio_context setupGPIOIn( int pinNumber );
+mraa_gpio_context setupGPIO( int pinNumber, int direction );
 
 void togglePin( mraa_gpio_context gpio);
 void outputPin( mraa_gpio_context gpio, int offOn );

@@ -44,6 +44,18 @@ void startMRAA( void ) {
 
 mraa_gpio_context setupGPIOOut( int pinNumber ) {
 
+	return setupGPIO( pinNumber, MRAA_GPIO_OUT );
+}
+
+
+mraa_gpio_context setupGPIOIn( int pinNumber ) {
+
+	return setupGPIO( pinNumber, MRAA_GPIO_IN );
+}
+
+
+mraa_gpio_context setupGPIO( int pinNumber, int direction ) {
+
     on = 0;
 
     mraa_gpio_context gpio = mraa_gpio_init( pinNumber );
@@ -55,7 +67,7 @@ mraa_gpio_context setupGPIOOut( int pinNumber ) {
 //        printf( "  Inited gpio: %p\n", gpio );
     }
 
-    response = mraa_gpio_dir( gpio, MRAA_GPIO_OUT );
+    response = mraa_gpio_dir( gpio, direction );
     if (response != MRAA_SUCCESS) {
         printf( "  Failed setting gpio pin direction\n" );
         mraa_result_print((mraa_result_t) response);
