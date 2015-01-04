@@ -26,6 +26,7 @@ double lastTime = 0.0;
 extern	mraa_gpio_context gpio;
 extern	mraa_gpio_context isro;
 extern	mraa_pwm_context pwmo;
+extern	mraa_aio_context aio;
 
 
 void startMRAA( void ) {
@@ -40,6 +41,9 @@ void startMRAA( void ) {
 //    printf( "  Platform type: %d\n", platform );
 
 }
+
+
+//--	----	----	----	General purpose input/output setup
 
 
 mraa_gpio_context setupGPIOOut( int pinNumber ) {
@@ -105,6 +109,38 @@ void closeGPIO( mraa_gpio_context gpio ) {
 }
 
 
+//--	----	----	----	Analog input setup
+
+
+mraa_aio_context setupAIO( int pinNumber ) {
+
+	mraa_aio_context aio = mraa_aio_init( pinNumber );
+    if ( ! aio ) {
+        printf( "  Failed initing aio\n" );
+        mraa_result_print( MRAA_ERROR_UNSPECIFIED );
+    	return 0;
+//    } else {
+//        printf( "  Inited aio: %p\n", aio );
+    }
+	return aio;
+}
+
+
+int readAIO(  mraa_aio_context aio ) {
+
+	return mraa_aio_read( aio );
+}
+
+
+void closeAIO(  mraa_aio_context aio ) {
+
+	mraa_aio_close( aio );
+}
+
+
+//--	----	----	----	Pulse width modulator setup
+
+
 mraa_pwm_context setupPWMO( int pinNumber ) {
 
     on = 0;
@@ -158,10 +194,8 @@ void closePWMO( mraa_pwm_context pwmo ) {
 }
 
 
+//--	----	----	----	Interrupt service routine setup
 
-// mraa_result_t mraa_gpio_isr(mraa_gpio_context dev, gpio_edge_t edge, void (*fptr)(void *), void * args);
-
-// mraa_result_t mraa_gpio_isr_exit(mraa_gpio_context dev);
 
 mraa_gpio_context setupISRO( int pinNumber ) {
 

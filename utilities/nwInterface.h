@@ -15,12 +15,15 @@
 #include "mraa.h"
 
 
-mraa_gpio_context gpio;
-mraa_gpio_context isro;
-mraa_pwm_context pwmo;
+mraa_gpio_context	gpio;
+mraa_gpio_context	isro;
+mraa_pwm_context	pwmo;
+mraa_aio_context	aio;
 
 
 void startMRAA( void );
+
+//--	----	----	----
 
 // General purpose I/O operations
 mraa_gpio_context setupGPIOOut( int pinNumber );
@@ -32,6 +35,14 @@ void outputPin( mraa_gpio_context gpio, int offOn );
 
 void closeGPIO(  mraa_gpio_context gpio );
 
+//--	----	----	----
+
+// General purpose analog input processes
+mraa_aio_context setupAIO( int pinNumber );
+
+void closeAIO(  mraa_aio_context aio );
+
+//--	----	----	----
 
 // Pulse Width Modulated pin control
 mraa_pwm_context setupPWMO( int pinNumber );
@@ -40,6 +51,7 @@ void setDutyCycle( mraa_pwm_context pwmo, float dutyCycle );
 
 void closePWMO(  mraa_pwm_context pwmo );
 
+//--	----	----	----
 
 // Interrupt Service trigger pin control
 mraa_gpio_context setupISRO( int pinNumber );
@@ -47,6 +59,8 @@ mraa_gpio_context setupISRO( int pinNumber );
 void closeISRO(  mraa_gpio_context isro );
 
 void isr1( void *arg );
+
+//--	----	----	----
 
 void closeMRAA( void );
 
