@@ -18,7 +18,7 @@
 // ToDo: spawn thread to parse command to achieve better performance
 void *monitorUserOps( void *arg ) {
 
-	(void)printf( "Starting user command input\n" );
+	printf( "Starting user command input\n" );
 //	char *msg = arg;
 //	printf( msg );
 

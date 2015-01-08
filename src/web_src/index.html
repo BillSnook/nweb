@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
+		<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<title>Edison Web Server</title>
 		<link rel="stylesheet" type="text/css" href="nweb.css"" />
@@ -10,22 +11,49 @@
 		<div id="Clock"><span id="liveclock"></span></div>
 		<script type="text/javascript">setup_clock()</script>
 
-		<h1>Edison Web Server</h1>
-		
-		<div class="sample">
-			<a href="javascript:loadDivObjWithPage(D1, 'sample.html')">Click for sample.html</a><br>
+		<h1>Edison Mobility</h1>
+
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D1, 'tDirA')">
+				tDirA
+			</div>
 		</div>
+		
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D1, 'tDirB')">
+				tDirB
+			</div>
+		</div>
+		
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D2, 'hiA')">
+				hiA
+			</div>
+		</div>
+		
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D2, 'hiB')">
+				hiB
+			</div>
+		</div>
+		
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D3, 'loA')">
+				loA
+			</div>
+		</div>
+		
+		<div class="buttonContainer">
+			<div class="buttonBox" onclick="javascript:loadDivObjWithPage(D3, 'loB')">
+				loB
+			</div>
+		</div>
+		
 		<div id="D1" class="desc">&nbsp;</div>
-
-		<div class="sample">
-			<a href="javascript:loadDivObjWithPage(D2, 'sample.txt')">Click for sample.txt</a><br>
-		</div>
 		<div id="D2" class="desc">&nbsp;</div>
-		
-		<div class="sample">
-			<a href="javascript:loadDivObjWithPage(D3, 'sample1')">Click for sample1 from Eddy</a><br>
-		</div>
 		<div id="D3" class="desc">&nbsp;</div>
-
+		
+		<script type="text/javascript">setup_pinMon()</script>
+		
 	</body>
 </html>

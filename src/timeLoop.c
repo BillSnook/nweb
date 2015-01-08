@@ -30,7 +30,10 @@ extern	mraa_gpio_context gpio;
 //extern	mraa_gpio_context isro;
 //extern	mraa_pwm_context  pwmo;
 
-#define	DEFAULT_LOOP_TIME	2.0
+extern	mraa_aio_context	vDet;
+extern	mraa_gpio_context	iSense;
+
+#define	DEFAULT_LOOP_TIME	1.0
 
 #endif	// DISABLE_IO
 
@@ -40,7 +43,7 @@ extern int		running;
 
 void *monitorTimeOps( void *arg ) {
 
-	(void)printf( "Start real-time action control\n" );
+//	printf( "Start real-time action control\n" );
 //	char *msg = arg;
 //	printf( msg );
 
@@ -60,6 +63,8 @@ void *monitorTimeOps( void *arg ) {
 
     startMRAA();
     gpio = setupGPIOOut( 13 );
+    iSense = setupGPIOIn( 9 );
+    vDet = setupAIO( 0 );
 //    isro = setupISRO( 12 );
 //    pwmo = setupPWMO( 3 );
 #endif	// DISABLE_IO
@@ -85,12 +90,14 @@ void *monitorTimeOps( void *arg ) {
 #ifndef	DISABLE_IO
 //    closePWMO( pwmo );
 //    closeISRO( isro );
+    closeAIO( vDet );
+    closeGPIO( iSense );
     closeGPIO( gpio );
 
     closeMRAA();
 #endif	// DISABLE_IO
 
-	exit( 1 );						// Exit program when told to quit via cntl-C
+	exit( 1 );						// Exit program when told to quit via cntl-C or by command
 
 	return NULL;
 }
@@ -98,7 +105,7 @@ void *monitorTimeOps( void *arg ) {
 
 void sig_handler(int signo) {
     if (signo == SIGINT) {			// Typically control-C
-        printf("\n\n        Closing IO nicely\n\n");
+//        printf("\n\n        Closing IO nicely\n\n");
         running = -1;
     }
 }

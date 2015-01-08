@@ -22,10 +22,9 @@
 //#include <semaphore.h>
 
 
-// This uses fork to create a new untethered process, then halts and returns to the command line
-// Otherwise if disabled, the program continues and we get printf output for debugging
-// So, off for debugging, on to run as daemon in background
-//#define	BECOME_ZOMBIE
+// We now do not fork; instead if zombie/daemon, do not start thread to get user input
+// So, off for use as app, on for use as service started at startup
+#define	BECOME_ZOMBIE
 
 
 #include "userLoop.h"
@@ -60,19 +59,20 @@ int main(int argc, char **argv) {
 	}
 
 	if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
-		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
+//		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
 		exit(3);
 	}
 
 	if ( chdir(baseDirectory) == -1 ) {
-		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
+//		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
 		exit(4);
 	}
 
 
-#ifdef	BECOME_ZOMBIE
+#ifndef	BECOME_ZOMBIE
+/*	Not used, even as daemon
 	// Create daemon + unstoppable and no zombie children (= no wait())
-	int pid;
+	int pid, i;
 	if ((pid = fork()) < 0) {
 		nlog( ERROR, "system call", "fork", 0 );
 	} else {
@@ -90,26 +90,26 @@ int main(int argc, char **argv) {
 
 	signal(SIGCHLD, SIG_IGN);				// ignore child death
 	signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
-
-#else	// BECOME_ZOMBIE
-
-	// we want to start a new thread to monitor our user input processes
+*/
+//#else	// BECOME_ZOMBIE
+/*	Not if we become a daemon */
+	// we want to start a new thread to monitor and execute user command input
 	// this only makes sense if we are not a zombie/daemon
 	pthread_t pThreadUser;	// this is our thread identifier
 	int resultUser = pthread_create( &pThreadUser, NULL, monitorUserOps, "param2" );
 	if ( 0 != resultUser ) {
-		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 2", 0 );	// returns failure to shell
+//		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create for user input", 0 );	// returns failure to shell
 	}
-
+/* */
 #endif	// BECOME_ZOMBIE
 
 	// we want to start a new thread to monitor our timed processes - like 'blink'
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param1" );
 	if ( 0 != resultTime ) {
-		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
-		nlog( ERROR, "system call", "pthread_create 1", 0 );	// returns failure to shell
+//		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+		nlog( ERROR, "system call", "pthread_create for timed operations", 0 );	// returns failure to shell
 	}
 
 	// setup the network socket
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+//	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
 
 	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {

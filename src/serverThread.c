@@ -100,8 +100,8 @@ int webDirectoryCheck( char *baseDir ) {
 	if ( !strncmp(baseDir,"/"   ,2 ) || !strncmp(baseDir,"/etc", 5 ) ||
 			!strncmp(baseDir,"/bin",5 ) || !strncmp(baseDir,"/lib", 5 ) ||
 			!strncmp(baseDir,"/tmp",5 ) || !strncmp(baseDir,"/usr", 5 ) ||
-			!strncmp(baseDir,"/dev",5 ) || !strncmp(baseDir,"/sbin",6) ){
-		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDir);
+			!strncmp(baseDir,"/dev",5 ) || !strncmp(baseDir,"/sbin",6) ) {
+//		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDir);
 		return 0;
 	}
 	return 1;
@@ -112,29 +112,29 @@ void printWebHelp() {
 
 #ifdef	NEW_CONTROLS
 
-	printf("hint: nweb Port-Number Top-Directory\n\n"
-				 "  nweb is a small and very safe mini web server\n"
-				 "  Specify a port and a named directory to start.\n"
-				 "  There are no fancy features = safe and secure.\n\n"
-				 "  Example: nweb 8080 /home/root/Code/Test &\n\n"
-				 );
+//	printf("hint: nweb Port-Number Top-Directory\n\n"
+//				 "  nweb is a small and very safe mini web server\n"
+//				 "  Specify a port and a named directory to start.\n"
+//				 "  There are no fancy features = safe and secure.\n\n"
+//				 "  Example: nweb 8080 /home/root/Code/Test &\n\n" );
 
 #else	// NEW_CONTROLS
 	int i;
 
-	printf("hint: nweb Port-Number Top-Directory\n\n"
-				 "\tnweb is a small and very safe mini web server\n"
-				 "\tnweb only servers out file/web pages with extensions named below\n"
-				 "\t and only from the named directory or its sub-directories.\n"
-				 "\tThere is no fancy features = safe and secure.\n\n"
-				 "\tExample: nweb 8080 /home/root/Code/Test &\n\n"
-				 "\tOnly Supports:");
-	for( i = 0; extensions[i].ext != 0; i++ )
-		printf(" %s",extensions[i].ext );
+//	printf("hint: nweb Port-Number Top-Directory\n\n"
+//				 "\tnweb is a small and very safe mini web server\n"
+//				 "\tnweb only servers out file/web pages with extensions named below\n"
+//				 "\t and only from the named directory or its sub-directories.\n"
+//				 "\tThere is no fancy features = safe and secure.\n\n"
+//				 "\tExample: nweb 8080 /home/root/Code/Test &\n\n"
+//				 "\tOnly Supports:");
+//	for( i = 0; extensions[i].ext != 0; i++ ) {
+//		printf(" %s",extensions[i].ext );
+//	}
 
-	printf("\n\tNot Supported: URLs including \"..\", Java, Javascript, CGI\n"
-					 "\tNot Supported: directories / /etc /bin /lib /tmp /usr /dev/sbin \n"
-					 "\tNo warranty given or implied\n\tNigel Griffiths nag@uk.ibm.com\n"
+//	printf("\n\tNot Supported: URLs including \"..\", Java, CGI\n"
+//					 "\tNot Supported: directories / /etc /bin /lib /tmp /usr /dev/sbin \n"
+//					 "\tNo warranty given or implied\n\tNigel Griffiths nag@uk.ibm.com\n"
 					 );
 #endif	// NEW_CONTROLS
 
@@ -148,14 +148,14 @@ void doParse( int socketfd, char *commandString ) {
 
 //	This variant extracts a string from the GET message
 //	It then tries to validate the string as a command and then to execute it
-	printf( "  received web command to parse: %s\n", commandString );
+//	printf( "  received web command to parse: %s\n", commandString );
 
 	// Here we parse the command
 	char *returnData = parseCommand( commandString );
 	if ( returnData ) {
 		sprintf( buffer, html_header );
 		write( socketfd, buffer, strlen( buffer ) );
-		printf( "  parse command returned: %s\n", returnData );
+//		printf( "  parse command returned: %s\n", returnData );
 
 		sprintf( buffer, returnData );
 		free( returnData );
@@ -196,15 +196,13 @@ void *webService( void *arg ) {
 	int file_fd, buflen, len;
 	char * fileType;
 
-//	printf( "\n" );
-
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;
 
 	ret = read( webData->socketfd, buffer, BUFSIZE );  // read Web request in one go
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
-		printf( "\n  socket read failure, exit thread\n" );
+//		printf( "\n  socket read failure, exit thread\n" );
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
 		close( webData->socketfd );
 		free( webData );
@@ -219,7 +217,7 @@ void *webService( void *arg ) {
 
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
-		printf( "\n  non-GET request received, exit thread\n" );
+//		printf( "\n  non-GET request received, exit thread\n" );
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
 		close( webData->socketfd );
 		free( webData );
@@ -240,11 +238,11 @@ void *webService( void *arg ) {
 		}
 	}
 
-	printf( "  got GET request: %s\n", &buffer[4] );
+//	printf( "  got GET request: %s\n", &buffer[4] );
 
 	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
-			printf( "\n  invalid .. directory entry in request, exit thread\n" );
+//			printf( "\n  invalid .. directory entry in request, exit thread\n" );
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
 			close( webData->socketfd );
 			free( webData );
@@ -254,9 +252,10 @@ void *webService( void *arg ) {
 
 //	This variant extracts the uri from the GET message
 
-	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) )	// check for missing uri
-		strcpy( buffer, "GET /moosetrap" );										// default to default null command??
-//	strcpy( buffer, "GET /index.html" );										// default to index file??
+	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri
+//		strcpy( buffer, "GET /moosetrap" );										// default to default null command??
+		strcpy( buffer, "GET /index.html" );										// default to index file??
+	}
 
 	// work out the file type and check we support it
 	buflen = (int)strlen( buffer );
@@ -273,11 +272,11 @@ void *webService( void *arg ) {
 		// investigate file name, handle it
 		char filePath[256];
 		sprintf( filePath, "%s/%s", webData->baseDirectory, &buffer[5]);
-		printf( "  got filePath: %s\n", filePath );
+//		printf( "  got filePath: %s\n", filePath );
 
 		// validate the filePath string to determine what to return - default is file at URI path
 		if ( ( file_fd = open( filePath, O_RDONLY ) ) != -1 ) {		// open file and check result
-			printf( "  found file at filePath: %s\n", filePath );
+//			printf( "  found file at filePath: %s\n", filePath );
 			// Send response - only one for now
 
 			len = (long)lseek( file_fd, (off_t)0, SEEK_END );		// lseek to the file end to find the length
@@ -293,19 +292,16 @@ void *webService( void *arg ) {
 			while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
 				write( socketfd, buffer, ret );			// write to client
 			}
-			printf( "  done replying for file URI: %s\n\n", filePath );
+//			printf( "  done replying for file URI: %s\n\n", filePath );
 		} else {													// open the file for reading
-//			nlog(NOTFOUND, "failed to open file",  filePath, webData->socketfd );
 			// Hidden command check here - file with recognized type not found
 			doParse( socketfd, &buffer[5] );
-			printf( "  done replying for file as command: %s\n\n", command );
+//			printf( "  done replying for file as command: %s\n\n", command );
 		}
-
 	} else {
-//		nlog( FORBIDDEN, "file extension type not supported", buffer, webData->socketfd );
 		// Hidden command check here - unrecognized file name ending
 		doParse( socketfd, &buffer[5] );
-		printf( "  done replying to command: %s\n\n", command );
+//		printf( "  done replying to command: %s\n\n", command );
 	}
 
 	close( webData->socketfd );

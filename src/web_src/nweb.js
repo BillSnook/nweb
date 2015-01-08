@@ -49,9 +49,58 @@ function loadDivObjWithPage( destDiv, dataPage ) {
 		alert( "In loadDivObjWithPage, unable to get XMLHttpRequest" );
 		return false;
 	}
+//	loadDisplayDivs( D2, "vDet" );
+//	loadDisplayDivs( D3, "iSense" );
     return true;
 }
 
+
+//  ----    ----
+
+
+function loadDisplayDivs( targetDiv, command ) {
+
+//	alert( "loadDisplayDivs" );
+    var div1http = getOurXMLHttpRequest();
+	if ( div1http ) {
+		div1http.open( "GET", command );		// File/Command name from the remote server
+		div1http.onreadystatechange = function() {
+			if ( div1http.readyState == 4 ) {
+				// Non-html data sent from our nweb server is without headers so no status is delivered
+				if ( ( 200 == div1http.status ) || ( 0 == div1http.status ) ) {
+//					alert("In loadDisplayDivs, got response " + div1http.responseText);
+					targetDiv.innerHTML = div1http.responseText;
+				} else {
+					alert("In loadDivObjWithPage, status returned: " + div1http.status + ", status text: " + div1http.statusText + ", response text: " + div1http.responseText );
+				}
+			}
+		}
+		div1http.send(null);
+	} else {
+		alert( "In loadDisplayDivs, unable to get XMLHttpRequest" );
+		return false;
+	}
+    return true;
+}
+
+
+//  ----    ----
+
+
+function setup_pinMon() {
+	
+//	alert( "In setup_pinMon" );
+	show_pinMon();
+	window.setInterval( "show_pinMon()", 1000 );	// 1 second
+// Milliseconds - nominally 1 second for status update
+}
+
+
+function show_pinMon() {
+//	alert( "In show_pinMon" );
+	loadDisplayDivs( D2, "vDet" );
+	loadDisplayDivs( D3, "iSense" );
+}
 
 //  ----    ----
 

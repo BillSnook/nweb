@@ -18,7 +18,8 @@
 mraa_gpio_context	gpio;
 mraa_gpio_context	isro;
 mraa_pwm_context	pwmo;
-mraa_aio_context	aio;
+mraa_aio_context	vDet;
+mraa_gpio_context	iSense;
 
 
 void startMRAA( void );
@@ -32,6 +33,7 @@ mraa_gpio_context setupGPIO( int pinNumber, int direction );
 
 void togglePin( mraa_gpio_context gpio);
 void outputPin( mraa_gpio_context gpio, int offOn );
+int inputPin( mraa_gpio_context gpio );
 
 void closeGPIO(  mraa_gpio_context gpio );
 
@@ -39,6 +41,8 @@ void closeGPIO(  mraa_gpio_context gpio );
 
 // General purpose analog input processes
 mraa_aio_context setupAIO( int pinNumber );
+
+int readAIO(  mraa_aio_context aio );
 
 void closeAIO(  mraa_aio_context aio );
 
