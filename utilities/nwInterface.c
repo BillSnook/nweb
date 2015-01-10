@@ -10,6 +10,8 @@
 
 #include "nwInterface.h"
 #include "nwTime.h"
+#include "../commands/parser.h"
+
 
 #ifndef	DISABLE_IO
 
@@ -28,6 +30,7 @@ double lastTime = 0.0;
 //extern	mraa_pwm_context pwmo;
 //extern	mraa_aio_context aio;
 
+extern struct _IO_FILE *serialPort;
 
 void startMRAA( void ) {
 
@@ -39,6 +42,7 @@ void startMRAA( void ) {
 //    mraa_platform_t platform = mraa_get_platform_type();
 //    printf( "  Platform type: %d\n", platform );
 
+	serialPort = stdout;
 }
 
 
@@ -222,17 +226,15 @@ mraa_gpio_context setupISRO( int pinNumber ) {
 //    printf( "  Setup isro pin direction to IN\n" );
     mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr1, isro);
 
-    if ( MRAA_SUCCESS == result ) {
- //       printf( "  Setup isro interrupt service routine\n" );
-
-        {	// Init to test pin level
-        lastTime = getTimeCheck();
-        isr1( NULL );				// Check level
-        }
-    } else {
+    if ( result != MRAA_SUCCESS ) {
 //        printf( "  Setup isro interrupt service routine failed with result: %d\n", result );
         return 0;
     }
+//    printf( "  Setup isro interrupt service routine\n" );
+
+    // Init to test pin level
+    lastTime = getTimeCheck();
+    isr1( NULL );				// Check level
 
  	return isro;
 }

@@ -22,7 +22,9 @@ extern	mraa_aio_context	vDet;
 extern	mraa_gpio_context	iSense;
 #endif	// DISABLE_IO
 
-extern int		running;
+extern int				running;
+extern struct _IO_FILE *serialPort;
+
 
 
 //--	----	----	----
@@ -44,9 +46,9 @@ char *getADCData( void ) {
 
 void putCommand( char type, char value ) {
 
-	putc( DC_SEND_HEADER, stdout);
-	putc( type, stdout);
-	putc( value, stdout);
+	putc( DC_SEND_HEADER, serialPort);
+	putc( type, serialPort);
+	putc( value, serialPort);
 	usleep( 20000 );
 
 /*
@@ -73,7 +75,7 @@ char *parseCommand( char *command ) {
 //		printf( "\n\n  Got exit !!\n\n" );
 ///		pthread_exit( NULL );						// Kill thread
 ///		exit( 1 );									// Kill program
-		running = 1;
+		running = 0;
 		return NULL;
 	}
 

@@ -10,6 +10,7 @@
 
 
 int		running;
+double	timeCheck;
 
 
 void *monitorTimeOps( void *arg );

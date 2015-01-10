@@ -3,6 +3,7 @@
 	<name>nweb</name>
 	<comment></comment>
 	<projects>
+		<project>nweb</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

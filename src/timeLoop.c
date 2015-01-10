@@ -39,21 +39,18 @@ extern	mraa_gpio_context	iSense;
 
 
 extern int		running;
+extern double	timeCheck;
 
 
 void *monitorTimeOps( void *arg ) {
 
-//	printf( "Start real-time action control\n" );
+//	printf( "Start real-time timed action control\n" );
 //	char *msg = arg;
 //	printf( msg );
 
 //	printf( "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
-	running = 0; 							// Enable run loop
-
     signal(SIGINT, sig_handler);
-
-    double timeCheck = DEFAULT_LOOP_TIME;	// Interval for ops in the loop
 
 #ifndef	DISABLE_IO
 //    double dutyCycle = 0.2;					// Portion of time output is on
@@ -69,13 +66,15 @@ void *monitorTimeOps( void *arg ) {
 //    pwmo = setupPWMO( 3 );
 #endif	// DISABLE_IO
 
+//	printf( "Start real-time timed action control, ready to start loop, running: %d, timeCheck: %f\n", running, timeCheck );
+
 	startElapsedTime();
-    while ( running == 0 ) {
+    while ( running ) {
     	if ( getElapsedTime() > timeCheck ) {
     		startElapsedTime();
 
 #ifdef	DISABLE_IO
-//        	printf( "\n    Tick\n" );
+        	printf( "\n    Tick\n" );
 #else	// DISABLE_IO
 
     		togglePin( gpio );
@@ -106,7 +105,7 @@ void *monitorTimeOps( void *arg ) {
 void sig_handler(int signo) {
     if (signo == SIGINT) {			// Typically control-C
 //        printf("\n\n        Closing IO nicely\n\n");
-        running = -1;
+        running = 0;
     }
 }
 

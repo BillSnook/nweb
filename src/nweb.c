@@ -24,13 +24,16 @@
 
 // We now do not fork; instead if zombie/daemon, do not start thread to get user input
 // So, off for use as app, on for use as service started at startup
-#define	BECOME_ZOMBIE
+//#define	BECOME_ZOMBIE
 
 
 #include "userLoop.h"
 #include "timeLoop.h"
 #include "serverThread.h"
 //#include "../commands/parser.h"
+
+
+//extern int				running;
 
 
 //--	----	----	----	----	----	----	----
@@ -40,10 +43,10 @@ char	*baseDirectory;
 
 
 int main(int argc, char **argv) {
-	int port, listenfd, socketfd, hit, bound;
+	int port, listenfd, requestfd, hit, bound;
 	size_t length;
-	static struct sockaddr_in cli_addr;		// static = initialized to zeros
-	static struct sockaddr_in serv_addr;	// static = initialized to zeros
+	static struct sockaddr_in reply_socketaddr;	// receive socket address from accept routine
+	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
 
 	if ( argc > 3 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "-h") ) {
 		printWebHelp();
@@ -53,45 +56,25 @@ int main(int argc, char **argv) {
 	if ( argc == 3 ) {
 		port = atoi(argv[1]);
 		baseDirectory = argv[2];
+		if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
+			printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
+			exit(3);
+		}
 	} else {
 		port = 80;
-		baseDirectory = "/home/root/Code/Test/web_src";
-	}
-
-	if ( 0 == webDirectoryCheck( baseDirectory ) ) {	// if top level directory where user should never go
-//		printf("ERROR: Bad top directory %s, see nweb -?\n", baseDirectory );
-		exit(3);
+		baseDirectory = "/opt/ea-web/web_src";
 	}
 
 	if ( chdir(baseDirectory) == -1 ) {
-//		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
+		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
 		exit(4);
 	}
 
+	running = 1; 						// Enable run loop
+    timeCheck = 1.0;					// Interval for checking in the loop
+
 
 #ifndef	BECOME_ZOMBIE
-/*	Not used, even as daemon
-	// Create daemon + unstoppable and no zombie children (= no wait())
-	int pid, i;
-	if ((pid = fork()) < 0) {
-		nlog( ERROR, "system call", "fork", 0 );
-	} else {
-		if ( pid > 0 ) {					// parent
-			return 0;						// parent returns OK to shell
-		}
-	}
-
-	// child
-	for (i = 0; i < 32; i++ )
-		close( i );							// close open files (such as i/o)
-
-	setpgrp();								// break away from process group so that
-											//  exiting terminal/login won't kill this program
-
-	signal(SIGCHLD, SIG_IGN);				// ignore child death
-	signal(SIGHUP, SIG_IGN);				// ignore terminal hangups
-*/
-//#else	// BECOME_ZOMBIE
 /*	Not if we become a daemon */
 	// we want to start a new thread to monitor and execute user command input
 	// this only makes sense if we are not a zombie/daemon
@@ -108,7 +91,9 @@ int main(int argc, char **argv) {
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param1" );
 	if ( 0 != resultTime ) {
-//		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+#ifndef	BECOME_ZOMBIE
+		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
+#endif	// BECOME_ZOMBIE
 		nlog( ERROR, "system call", "pthread_create for timed operations", 0 );	// returns failure to shell
 	}
 
@@ -119,28 +104,30 @@ int main(int argc, char **argv) {
 	if ( port < 0 || port > 60000 )
 		nlog( ERROR, "Invalid port number (try 1->60000)", argv[1], 0 );
 
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = htonl( INADDR_ANY );
-	serv_addr.sin_port = htons( port );
+	listen_socketaddr.sin_family = AF_INET;
+	listen_socketaddr.sin_addr.s_addr = htonl( INADDR_ANY );
+	listen_socketaddr.sin_port = htons( port );
 
-	bound = bind( listenfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)); // permission error
+	bound = bind( listenfd, (struct sockaddr *)&listen_socketaddr, sizeof(listen_socketaddr)); // permission error
 	if ( bound < 0 )
 		nlog( ERROR, "system call", "bind", 0 );
 
 	if ( listen( listenfd, 64 ) < 0 )
 		nlog( ERROR, "system call", "listen", 0 );
 
-//	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+#ifndef	BECOME_ZOMBIE
+	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+#endif	// BECOME_ZOMBIE
 
 	pthread_t pThread;	// this is our thread identifier
 	for ( hit = 1; ; hit++ ) {
-		length = sizeof( cli_addr );
-		if ( ( socketfd = accept( listenfd, (struct sockaddr *)&cli_addr, &length) ) < 0 )
+		length = sizeof( reply_socketaddr );
+		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 )
 			nlog( ERROR, "system call", "accept", 0 );
 
 		web_data *webData = malloc( sizeof( web_data ) );
 		if ( webData ) {
-			webData->socketfd = socketfd;
+			webData->socketfd = requestfd;
 			webData->baseDirectory = baseDirectory;
 
 			int result = pthread_create( &pThread, NULL, webService, webData );

@@ -21,6 +21,7 @@
 #define FW               0xff
 #define BW               0x00
 
+struct _IO_FILE *serialPort;
 
 char *parseCommand( char *command );
 
