@@ -27,7 +27,7 @@
 							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.244672254" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.920567455" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.852625168" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.852625168" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.other.878818801" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="${CFLAGS}" valueType="string"/>
 								<option id="gnu.c.compiler.option.dialect.std.198579473" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.637577451" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
@@ -51,17 +51,18 @@
 									<listOptionValue builtIn="false" value="/Users/Bill/Code/Edison/iotdk-ide-mac/devkit-x86/sysroots/i586-poky-linux/usr/include/mraa"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.dialect.std.1663398685" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.other.532230924" superClass="gnu.cpp.compiler.option.debugging.other" value="-s nweb" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.debugging.other.532230924" name="Other debugging flags" superClass="gnu.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-s nweb" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.237533275" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1726018804" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.2020206044" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
-								<option id="gnu.cpp.link.option.flags.1573627538" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="${LDFLAGS} -lmraa" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.1573627538" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="${LDFLAGS}" valueType="string"/>
 								<option id="gnu.cpp.link.option.libs.1893292295" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="mraa"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
 								<option id="gnu.cpp.link.option.defname.270675047" name="DEF file name (-Wl,--output-def=)" superClass="gnu.cpp.link.option.defname" value="" valueType="string"/>
-								<option id="gnu.cpp.link.option.other.1129927668" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList"/>
+								<option id="gnu.cpp.link.option.other.1129927668" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.207856235" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -123,7 +124,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
 								<option id="gnu.cpp.compiler.option.optimization.level.1734728033" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.size" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1131365372" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1131365372" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.other.other.415741114" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="${CXXFLAGS}" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1462655427" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${DEVKIT_HOME}/devkit-x86/sysroots/i586-poky-linux/usr/include"/>
@@ -137,8 +138,9 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.377034703" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1014679982" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
-								<option id="gnu.cpp.link.option.flags.1788437713" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="${LDFLAGS} -lmraa" valueType="string"/>
+								<option id="gnu.cpp.link.option.flags.1788437713" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="${LDFLAGS}" valueType="string"/>
 								<option id="gnu.cpp.link.option.libs.477581396" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="mraa"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1659042096" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -272,9 +274,7 @@
 		</configuration>
 		<configuration configurationName="RunArduino"/>
 		<configuration configurationName="RunBB"/>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/iotdk-cpp-template"/>
-		</configuration>
+		<configuration configurationName="Debug"/>
 		<configuration configurationName="Run"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
@@ -329,9 +329,6 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268;cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.;cdt.managedbuild.tool.gnu.cross.c.compiler.123471262;cdt.managedbuild.tool.gnu.c.compiler.input.826279940">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.705091800;cdt.managedbuild.config.gnu.cross.exe.debug.705091800.;cdt.managedbuild.tool.gnu.cross.c.compiler.244672254;cdt.managedbuild.tool.gnu.c.compiler.input.731790533">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
@@ -344,6 +341,9 @@
 					<parser enabled="true"/>
 				</scannerInfoProvider>
 			</profile>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268;cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.;cdt.managedbuild.tool.gnu.cross.c.compiler.123471262;cdt.managedbuild.tool.gnu.c.compiler.input.826279940">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

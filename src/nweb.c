@@ -22,7 +22,7 @@
 //#include <semaphore.h>
 
 
-// We now do not fork; instead if zombie/daemon, do not start thread to get user input
+// If zombie/daemon, do not start thread to get user input
 // So, off for use as app, on for use as service started at startup
 //#define	BECOME_ZOMBIE
 
@@ -43,7 +43,7 @@ char	*baseDirectory;
 
 
 int main(int argc, char **argv) {
-	int port, listenfd, requestfd, hit, bound;
+	int port, listenfd, requestfd, bound;
 	size_t length;
 	static struct sockaddr_in reply_socketaddr;	// receive socket address from accept routine
 	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
@@ -87,15 +87,15 @@ int main(int argc, char **argv) {
 /* */
 #endif	// BECOME_ZOMBIE
 
+#ifndef	BECOME_ZOMBIE
 	// we want to start a new thread to monitor our timed processes - like 'blink'
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param1" );
 	if ( 0 != resultTime ) {
-#ifndef	BECOME_ZOMBIE
 		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
-#endif	// BECOME_ZOMBIE
 		nlog( ERROR, "system call", "pthread_create for timed operations", 0 );	// returns failure to shell
 	}
+#endif	// BECOME_ZOMBIE
 
 	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
 #endif	// BECOME_ZOMBIE
 
 	pthread_t pThread;	// this is our thread identifier
-	for ( hit = 1; ; hit++ ) {
+	while ( running ) {
 		length = sizeof( reply_socketaddr );
 		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 )
 			nlog( ERROR, "system call", "accept", 0 );
@@ -138,6 +138,8 @@ int main(int argc, char **argv) {
 			nlog( ERROR, "system call", "allocate web_data", 0 );
 		}
 	}
+	printf("\n\nNot running in main routine\n\n");
+	return 0;
 }
 
 // End of nweb

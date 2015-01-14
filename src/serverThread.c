@@ -199,12 +199,12 @@ void *webService( void *arg ) {
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;
 
-	ret = read( webData->socketfd, buffer, BUFSIZE );  // read Web request in one go
+	ret = read( socketfd, buffer, BUFSIZE );  // read Web request in one go
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 //		printf( "\n  socket read failure, exit thread\n" );
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
-		close( webData->socketfd );
+		close( socketfd );
 		free( webData );
 		pthread_exit( NULL );
 		return NULL;
@@ -219,7 +219,7 @@ void *webService( void *arg ) {
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
 //		printf( "\n  non-GET request received, exit thread\n" );
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
-		close( webData->socketfd );
+		close( socketfd );
 		free( webData );
 		pthread_exit( NULL );
 		return NULL;
@@ -244,7 +244,7 @@ void *webService( void *arg ) {
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
 //			printf( "\n  invalid .. directory entry in request, exit thread\n" );
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
-			close( webData->socketfd );
+			close( socketfd );
 			free( webData );
 			pthread_exit( NULL );
 			return NULL;
@@ -283,7 +283,7 @@ void *webService( void *arg ) {
 			lseek(file_fd, (off_t)0, SEEK_SET  );					// lseek back to the file start ready for reading
 		    sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // 1.1 Header + a blank line
 
-			write( webData->socketfd, buffer, strlen( buffer ) );
+			write( socketfd, buffer, strlen( buffer ) );
 
 //			sprintf( buffer, "HTTP/1.0 200 OK\r\nContent-Type: %s\r\n\r\n", fileType );	// 1.0 Shorter version, length not needed
 //			write( socketfd, buffer, strlen( buffer ) );
@@ -304,7 +304,7 @@ void *webService( void *arg ) {
 //		printf( "  done replying to command: %s\n\n", command );
 	}
 
-	close( webData->socketfd );
+	close( socketfd );
 	free( webData );
 	pthread_exit( NULL );
 	return NULL;

@@ -37,7 +37,7 @@ void startMRAA( void ) {
 //	printf( "\n  I/O is enabled\n" );
 	mraa_init();
 
-//	printf( "  mraa Version: %s\n", mraa_get_version() );
+	printf( "  mraa Version: %s\n", mraa_get_version() );
 
 //    mraa_platform_t platform = mraa_get_platform_type();
 //    printf( "  Platform type: %d\n", platform );

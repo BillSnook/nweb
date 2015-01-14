@@ -48,7 +48,7 @@ void *monitorTimeOps( void *arg ) {
 //	char *msg = arg;
 //	printf( msg );
 
-//	printf( "\n\n    nweb/MotionKit Version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
+//	printf( "\n\n    ea-web version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
     signal(SIGINT, sig_handler);
 
@@ -66,7 +66,7 @@ void *monitorTimeOps( void *arg ) {
 //    pwmo = setupPWMO( 3 );
 #endif	// DISABLE_IO
 
-//	printf( "Start real-time timed action control, ready to start loop, running: %d, timeCheck: %f\n", running, timeCheck );
+	printf( "Start real-time timed action control, ready to start loop, running: %d, timeCheck: %f\n", running, timeCheck );
 
 	startElapsedTime();
     while ( running ) {

@@ -46,14 +46,14 @@ char *getADCData( void ) {
 
 void putCommand( char type, char value ) {
 
+/*
 	putc( DC_SEND_HEADER, serialPort);
 	putc( type, serialPort);
 	putc( value, serialPort);
 	usleep( 20000 );
-
-/*
-	printf( "Output type: 0x%02X, value: 0x%02X\n", type & 0x0FF, value & 0x0FF );
 */
+
+	printf( "Output type: 0x%02X, value: 0x%02X\n", type & 0x0FF, value & 0x0FF );
 }
 
 //--	----	----	----
@@ -85,14 +85,14 @@ char *parseCommand( char *command ) {
 	}
 
 	char *buffer = malloc( 1000 );
-	if ( 0 == strcmp( "vDet", command ) ) {	// null command if empty uri entered
+	if ( 0 == strcmp( "vDet", command ) ) {
 //		printf( "  Got vDet, read ADC for vDet on pin 1\n" );
 		int adc1 = readAIO( vDet );
 		sprintf( buffer, "%d", adc1 & 0x03FF );
 		return buffer;
 	}
 
-	if ( 0 == strcmp( "iSense", command ) ) {	// null command if empty uri entered
+	if ( 0 == strcmp( "iSense", command ) ) {
 //		printf( "  Got iSense, detect signal for iSense on pin 9\n" );
 		int pin9 = inputPin( iSense );
 		sprintf( buffer, "%d", pin9 );

@@ -25,13 +25,15 @@ void *monitorUserOps( void *arg ) {
 	sleep( 1 );		// Let other threads initialize before presenting command prompt
 
 	while ( 1 ) {
-		printf( "\nCommand: " );
-		scanf( "%s", command );
-		printf( "Got command: %s\n", command );
+//		printf( "\nCommand: " );
+//		int scanSize =
+//		scanf( "%s", command );
+		int sz = getline( command, 256, stdin);
+		printf( "Got command size: %d, : %s\n", sz, command );
 
 		char *response = parseCommand( command );
 		if ( NULL != response ) {
-			printf( ">>  %s\n", response );
+//			printf( ">>  %s\n", response );
 			free( response );
 		}
 	}
