@@ -67,7 +67,7 @@ mraa_gpio_context setupGPIO( int pinNumber, int direction ) {
 
     mraa_gpio_context gpio = mraa_gpio_init( pinNumber );
     if ( ! gpio ) {
-//        printf( "  Failed initing gpio\n" );
+        printf( "  Failed initing gpio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
 //    } else {
@@ -125,7 +125,7 @@ mraa_aio_context setupAIO( int pinNumber ) {
 
 	mraa_aio_context aio = mraa_aio_init( pinNumber );
     if ( ! aio ) {
-//        printf( "  Failed initing aio\n" );
+        printf( "  Failed initing aio\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
 //    } else {
@@ -156,7 +156,7 @@ mraa_pwm_context setupPWMO( int pinNumber ) {
 
     mraa_pwm_context pwmo = mraa_pwm_init( pinNumber );
     if ( ! pwmo ) {
-//        printf( "  Failed initing pwmo\n" );
+        printf( "  Failed initing pwmo\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
     }
@@ -210,7 +210,7 @@ mraa_gpio_context setupISRO( int pinNumber ) {
 
 	mraa_gpio_context isro = mraa_gpio_init( pinNumber );
     if ( ! isro ) {
-//        printf( "  Failed initing isro\n" );
+        printf( "  Failed initing isro\n" );
         mraa_result_print( MRAA_ERROR_UNSPECIFIED );
     	return 0;
 //    } else {

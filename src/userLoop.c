@@ -24,17 +24,25 @@ void *monitorUserOps( void *arg ) {
 
 	sleep( 1 );		// Let other threads initialize before presenting command prompt
 
+	size_t sz = 256;
+	char *cmd;
+	ssize_t gotCount;
 	while ( 1 ) {
 //		printf( "\nCommand: " );
-//		int scanSize =
-//		scanf( "%s", command );
-		int sz = getline( command, 256, stdin);
-		printf( "Got command size: %d, : %s\n", sz, command );
+//		int scanSize = scanf( "%s\n", command );
+		cmd = malloc( sz );
+		gotCount = getline( &cmd, &sz, stdin );
+		printf( "Got command size: %d, %s\n", gotCount, cmd );
 
-		char *response = parseCommand( command );
-		if ( NULL != response ) {
-//			printf( ">>  %s\n", response );
-			free( response );
+		if ( gotCount > 1 ) {
+			memmove( command, cmd, strlen( cmd ) - 1 );
+			command[ strlen( cmd ) - 1 ] = 0;
+			char *response = parseCommand( command );
+			free( cmd );
+			if ( NULL != response ) {
+				printf( ">>  %s\n", response );
+				free( response );
+			}
 		}
 	}
 

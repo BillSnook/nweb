@@ -45,7 +45,7 @@ char	*baseDirectory;
 int main(int argc, char **argv) {
 	int port, listenfd, requestfd, bound;
 	size_t length;
-	static struct sockaddr_in reply_socketaddr;	// receive socket address from accept routine
+	static struct sockaddr_in reply_socketaddr;		// receive socket address from accept routine
 	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
 
 	if ( argc > 3 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "-h") ) {
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 		baseDirectory = "/opt/ea-web/web_src";
 	}
 
-	if ( chdir(baseDirectory) == -1 ) {
+	if ( chdir( baseDirectory ) == -1 ) {
 		printf("ERROR: Can't Change to directory in second argument: %s\n", baseDirectory);
 		exit(4);
 	}
@@ -73,9 +73,8 @@ int main(int argc, char **argv) {
 	running = 1; 						// Enable run loop
     timeCheck = 1.0;					// Interval for checking in the loop
 
-
 #ifndef	BECOME_ZOMBIE
-/*	Not if we become a daemon */
+//	if we do not become a daemon, create a thread to monitor and respond to user input
 	// we want to start a new thread to monitor and execute user command input
 	// this only makes sense if we are not a zombie/daemon
 	pthread_t pThreadUser;	// this is our thread identifier
@@ -84,10 +83,9 @@ int main(int argc, char **argv) {
 //		printf( "\n\npthread_create 2 error. Ack!!\n\n" );
 		nlog( ERROR, "system call", "pthread_create for user input", 0 );	// returns failure to shell
 	}
-/* */
+
 #endif	// BECOME_ZOMBIE
 
-#ifndef	BECOME_ZOMBIE
 	// we want to start a new thread to monitor our timed processes - like 'blink'
 	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, NULL, monitorTimeOps, "param1" );
@@ -95,7 +93,6 @@ int main(int argc, char **argv) {
 		printf( "\n\npthread_create 1 error. Ack!!\n\n" );
 		nlog( ERROR, "system call", "pthread_create for timed operations", 0 );	// returns failure to shell
 	}
-#endif	// BECOME_ZOMBIE
 
 	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
@@ -141,5 +138,6 @@ int main(int argc, char **argv) {
 	printf("\n\nNot running in main routine\n\n");
 	return 0;
 }
+
 
 // End of nweb
