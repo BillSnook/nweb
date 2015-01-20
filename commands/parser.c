@@ -86,7 +86,7 @@ char *parseCommand( char *command ) {
 	}
 
 	if ( 0 == strcmp( "st", command ) ) {			// Serial Test command
-		printf( "  Got st\n" );
+//		printf( "  Got st\n" );
 // WFS		setupSerial();
 		return NULL;
 	}
@@ -297,7 +297,7 @@ void setupSer( char *portNum02 ) {
 	cfsetospeed (&tty, B9600 );
 	cfsetispeed (&tty, B9600 );
 
-/*
+/**/
 	// Setting other Port Stuff
 	tty.c_cflag     &=  ~PARENB;        // Make 8n1
 	tty.c_cflag     &=  ~CSTOPB;
@@ -313,7 +313,7 @@ void setupSer( char *portNum02 ) {
 	tty.c_iflag     &=  ~(IXON | IXOFF | IXANY);	// turn off s/w flow ctrl
 	tty.c_lflag     &=  ~(ICANON | ECHO | ECHOE | ISIG);	// make raw
 	tty.c_oflag     &=  ~OPOST;         // make raw
-*/
+/**/
 	// Flush Port, then applies attributes
 	tcflush( serialPort, TCIFLUSH );
 

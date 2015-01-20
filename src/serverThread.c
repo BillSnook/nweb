@@ -141,7 +141,8 @@ void printWebHelp() {
 }
 
 
-void doParse( int socketfd, char *commandString ) {
+// this applies to web GET command line strings
+void doParseWebURI( int socketfd, char *commandString ) {
 	char buffer[256];
 
 	extern char command[];	// Access commands entered from the command line
@@ -152,14 +153,19 @@ void doParse( int socketfd, char *commandString ) {
 
 	// Here we parse the command
 	char *returnData = parseCommand( commandString );
-	if ( returnData ) {
-		sprintf( buffer, html_header );
+	// for now we are confused
+	// if data is returned we want to return it to the web client
+	// but if there is no return data, we want to signal that too
+	if ( returnData ) {						// this call resulted in data to be returned as html
+		sprintf( buffer, html_header );		// signal legitimate html data returned - not CGI
+											// it's just not a full html file since this is usually ajax
 		write( socketfd, buffer, strlen( buffer ) );
 //		printf( "  parse command returned: %s\n", returnData );
 
 		sprintf( buffer, returnData );
 		free( returnData );
-	} else {
+		// continue to buffer write sequence
+	} else {								// this call resulted in no data to be returned as html
 		// Here we create the response page
 //		sprintf( buffer, "HTTP/1.1 200 OK\r\nServer: nweb/%d.%d\r\nContent-Length: %ld\r\nConnection: close\r\nContent-Type: %s\r\n\r\n", VERSION, SUB_VERSION, (long)len, fileType ); // Header + a blank line
 //		write( socketfd, buffer, strlen( buffer ) );
@@ -171,16 +177,18 @@ void doParse( int socketfd, char *commandString ) {
 		int sz = sprintf( buffer, html_head );		// Start with html and head /head tags and opening body tag
 
 		// Here we sprintf the html contents for display
-		sz += sprintf( &buffer[sz], "<h1>Edison return data</h1>\r\n" );
-		sz += sprintf( &buffer[sz], "<h2>The data would show here: " );
+		// for now just display the current command
+		sz += sprintf( &buffer[sz], "<h1>Edison did not return data</h1>\r\n" );
+		sz += sprintf( &buffer[sz], "<h2>The current command is here: " );
 		sz += sprintf( &buffer[sz], command );
 		sz += sprintf( &buffer[sz], "</h2>" );
 
 		sz += sprintf( &buffer[sz], html_foot );	// String with ending /body and /html tags, finalize the page
+		// continue to buffer write sequence
 	}
 	write( socketfd, buffer, strlen( buffer ) );
 
-	strcpy( command, commandString );
+	strcpy( command, commandString );				// save for the record
 
 }
 
@@ -199,7 +207,7 @@ void *webService( void *arg ) {
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;
 
-	ret = read( socketfd, buffer, BUFSIZE );  // read Web request in one go
+	ret = read( socketfd, buffer, BUFSIZE );	// read Web request in one go
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 //		printf( "\n  socket read failure, exit thread\n" );
@@ -250,7 +258,7 @@ void *webService( void *arg ) {
 			return NULL;
 		}
 
-//	This variant extracts the uri from the GET message
+//	Get the uri from the GET message
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri
 //		strcpy( buffer, "GET /moosetrap" );										// default to default null command??
@@ -295,12 +303,12 @@ void *webService( void *arg ) {
 //			printf( "  done replying for file URI: %s\n\n", filePath );
 		} else {													// open the file for reading
 			// Hidden command check here - file with recognized type not found
-			doParse( socketfd, &buffer[5] );
+			doParseWebURI( socketfd, &buffer[5] );
 //			printf( "  done replying for file as command: %s\n\n", command );
 		}
 	} else {
 		// Hidden command check here - unrecognized file name ending
-		doParse( socketfd, &buffer[5] );
+		doParseWebURI( socketfd, &buffer[5] );
 //		printf( "  done replying to command: %s\n\n", command );
 	}
 

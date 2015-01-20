@@ -40,6 +40,7 @@ void printWebHelp();
 
 int webDirectoryCheck( char *baseDir );
 
+void doParseWebURI( int socketfd, char *commandString );
 void *webService( void *arg );
 
 

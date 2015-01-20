@@ -31,19 +31,20 @@ void *monitorUserOps( void *arg ) {
 //		printf( "\nCommand: " );
 //		int scanSize = scanf( "%s\n", command );
 		cmd = malloc( sz );
-		gotCount = getline( &cmd, &sz, stdin );
-		printf( "Got command size: %d, %s\n", gotCount, cmd );
+		gotCount = getline( &cmd, &sz, stdin );	// includes newline and terminating NULL
+//		printf( "Got command size: %d, %s\n", gotCount, cmd );
 
 		if ( gotCount > 1 ) {
 			memmove( command, cmd, strlen( cmd ) - 1 );
-			command[ strlen( cmd ) - 1 ] = 0;
+			command[ strlen( cmd ) - 1 ] = 0;	// replace newline with end of string null (0)
+//			printf( "received user command to parse: %s\n", command );
 			char *response = parseCommand( command );
-			free( cmd );
 			if ( NULL != response ) {
-				printf( ">>  %s\n", response );
+				printf( ">>  response: %s\n", response );
 				free( response );
 			}
 		}
+		free( cmd );
 	}
 
 	return NULL;
