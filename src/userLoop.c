@@ -14,6 +14,9 @@
 #include "userLoop.h"
 #include "../commands/parser.h"
 
+extern int		running;
+
+
 // Thread master, loop prompting for a command and then parsing it, rinse, repeat;
 // ToDo: spawn thread to parse command to achieve better performance
 void *monitorUserOps( void *arg ) {
@@ -25,14 +28,14 @@ void *monitorUserOps( void *arg ) {
 	sleep( 1 );		// Let other threads initialize before presenting command prompt
 
 	size_t sz = 256;
-	char *cmd;
+	char *cmd = malloc( sz );
 	ssize_t gotCount;
-	while ( 1 ) {
+	while ( running ) {
 //		printf( "\nCommand: " );
 //		int scanSize = scanf( "%s\n", command );
-		cmd = malloc( sz );
+
 		gotCount = getline( &cmd, &sz, stdin );	// includes newline and terminating NULL
-//		printf( "Got command size: %d, %s\n", gotCount, cmd );
+//		printf( "Got command size: %d, %s\n", sz, cmd );
 
 		if ( gotCount > 1 ) {
 			memmove( command, cmd, strlen( cmd ) - 1 );
@@ -44,8 +47,8 @@ void *monitorUserOps( void *arg ) {
 				free( response );
 			}
 		}
-		free( cmd );
 	}
+	free( cmd );
 
 	return NULL;
 }

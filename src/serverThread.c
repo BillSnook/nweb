@@ -57,7 +57,7 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 
 	switch (type) {
 		case ERROR:
-			sprintf(logbuffer,"ERROR: %s:%s Errno=%d (%d) exiting pid=%d", s1, s2, errno, socket_fd, getpid() );
+			sprintf(logbuffer,"ERROR: %s %s Errno=%d (%s), Err=%d, pid=%d", s1, s2, errno, strerror(errno), socket_fd, getpid() );
 			break;
 
 		case FORBIDDEN:
@@ -71,15 +71,14 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 			break;
 
 		case LOG:
-			sprintf(logbuffer," INFO: %s:%s:%d",s1, s2, socket_fd );
+			sprintf(logbuffer," INFO: %s %s: %d",s1, s2, socket_fd );
 			break;
 
 		default:
-			sprintf(logbuffer," Unrecognized: %s:%s:%d",s1, s2, socket_fd );
+			sprintf(logbuffer," Unrecognized: %s %s: %d",s1, s2, socket_fd );
 			break;
 	}
 
-	// no checks here, nothing can be done a failure anyway
 	if ( ( fd = open( "nweb.log", O_CREAT | O_WRONLY | O_APPEND, 0644 ) ) >= 0 ) {
 		write( fd, logbuffer, strlen( logbuffer ) );
 		write( fd, "\n",  1 );
@@ -87,7 +86,7 @@ void nlog(int type, char *s1, char *s2, int socket_fd) {
 	}
 
 	if ( type == ERROR )
-		exit( 3 );
+		exit( 70 );
 	if ( ( type == FORBIDDEN ) || ( type = NOTFOUND ) ) {
 //		pthread_exit( NULL );
 	}
@@ -300,6 +299,7 @@ void *webService( void *arg ) {
 			while ( (ret = read( file_fd, buffer, BUFSIZE ) ) > 0 ) {	// read from file,
 				write( socketfd, buffer, ret );			// write to client
 			}
+			close( file_fd );
 //			printf( "  done replying for file URI: %s\n\n", filePath );
 		} else {													// open the file for reading
 			// Hidden command check here - file with recognized type not found

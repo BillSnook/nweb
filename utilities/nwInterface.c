@@ -206,7 +206,7 @@ void closePWMO( mraa_pwm_context pwmo ) {
 //--	----	----	----	Interrupt service routine setup
 
 
-mraa_gpio_context setupISRO( int pinNumber ) {
+mraa_gpio_context setupISRO( int pinNumber, void (*isrHandler)(void *) ) {
 
 	mraa_gpio_context isro = mraa_gpio_init( pinNumber );
     if ( ! isro ) {
@@ -224,7 +224,7 @@ mraa_gpio_context setupISRO( int pinNumber ) {
         return 0;
     }
 //    printf( "  Setup isro pin direction to IN\n" );
-    mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, &isr1, isro);
+    mraa_result_t result = mraa_gpio_isr( isro, MRAA_GPIO_EDGE_BOTH, isrHandler, isro);
 
     if ( result != MRAA_SUCCESS ) {
 //        printf( "  Setup isro interrupt service routine failed with result: %d\n", result );
@@ -233,8 +233,8 @@ mraa_gpio_context setupISRO( int pinNumber ) {
 //    printf( "  Setup isro interrupt service routine\n" );
 
     // Init to test pin level
-    lastTime = getTimeCheck();
-    isr1( NULL );				// Check level
+//    lastTime = getTimeCheck();
+//    isr1( NULL );				// Check level
 
  	return isro;
 }

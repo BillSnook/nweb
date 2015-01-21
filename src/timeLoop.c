@@ -18,11 +18,7 @@
 #include "../utilities/nwTime.h"
 
 
-#ifdef	DISABLE_IO
-
-#define	DEFAULT_LOOP_TIME	10.0
-
-#else	// DISABLE_IO
+#ifndef	DISABLE_IO
 
 #include "../utilities/nwInterface.h"
 
@@ -33,8 +29,6 @@ extern	mraa_gpio_context gpio;
 extern	mraa_aio_context	vDet;
 extern	mraa_gpio_context	iSense;
 
-#define	DEFAULT_LOOP_TIME	1.0
-
 #endif	// DISABLE_IO
 
 
@@ -42,13 +36,25 @@ extern int		running;
 extern double	timeCheck;
 
 
+void isrProc( void *arg ) {
+
+//	mraa_gpio_context isro = (mraa_gpio_context)arg;
+//	double thisTime = getTimeCheck();
+//	double diff = ((double) (thisTime - lastTime) * 2);
+
+	int readInput =  mraa_gpio_read( isro );
+	printf( "isrProc, state: %d\n", readInput );
+
+//	printf( "Interrupt1, state: %d, diff: %.2f uSec\n", readInput, diff );
+//	lastTime = thisTime;
+
+}
+
+
 void *monitorTimeOps( void *arg ) {
 
-//	printf( "Start real-time timed action control\n" );
 //	char *msg = arg;
 //	printf( msg );
-
-//	printf( "\n\n    ea-web version %d.%d, starting loop process\n", VERSION, SUB_VERSION );
 
     signal(SIGINT, sig_handler);
 
@@ -62,7 +68,7 @@ void *monitorTimeOps( void *arg ) {
     gpio = setupGPIOOut( 13 );
     iSense = setupGPIOIn( 9 );
     vDet = setupAIO( 0 );
-//    isro = setupISRO( 12 );
+//    isro = setupISRO( 12, &isrProc );
 //    pwmo = setupPWMO( 3 );
 #endif	// DISABLE_IO
 

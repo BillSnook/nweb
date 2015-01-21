@@ -81,7 +81,7 @@ char *parseCommand( char *command ) {
 //		printf( "\n\n  Got exit !!\n\n" );
 ///		pthread_exit( NULL );						// Kill thread
 ///		exit( 1 );									// Kill program
-//		running = 0;
+		running = 0;
 		return NULL;
 	}
 
@@ -269,7 +269,8 @@ void setupSer( char *portNum02 ) {
 	sprintf( devPort, "/dev/tty%s", portNum02 );
 	printf( "  Serial port prepare to open %s\n", devPort );
 
-	int serialPort = open( devPort, O_RDWR| O_NONBLOCK | O_NDELAY );
+//	int serialPort = open( devPort, O_RDWR| O_NONBLOCK | O_NDELAY );
+	int serialPort = open( devPort, O_RDWR| O_NONBLOCK | O_NOCTTY | O_SYNC );
 
 	// Error check
 	if ( serialPort < 0 ) {
