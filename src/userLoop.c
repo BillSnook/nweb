@@ -25,7 +25,7 @@ void *monitorUserOps( void *arg ) {
 //	char *msg = arg;
 //	printf( msg );
 
-	sleep( 1 );		// Let other threads initialize before presenting command prompt
+//	sleep( 1 );		// Let other threads initialize before presenting command prompt
 
 	size_t sz = 256;
 	char *cmd = malloc( sz );
@@ -35,9 +35,9 @@ void *monitorUserOps( void *arg ) {
 //		int scanSize = scanf( "%s\n", command );
 
 		gotCount = getline( &cmd, &sz, stdin );	// includes newline and terminating NULL
-//		printf( "Got command size: %d, %s\n", sz, cmd );
 
 		if ( gotCount > 1 ) {
+//			printf( "Got command size: %d, %s\n", gotCount, cmd );
 			memmove( command, cmd, strlen( cmd ) - 1 );
 			command[ strlen( cmd ) - 1 ] = 0;	// replace newline with end of string null (0)
 //			printf( "received user command to parse: %s\n", command );

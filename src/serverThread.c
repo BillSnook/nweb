@@ -13,6 +13,10 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <pthread.h>
 
 //#include "userLoop.h"
@@ -45,6 +49,10 @@ struct fileMap extensions [] = {
 	{"txt","text/html" },
 	{0,0}
 };
+
+extern int		running;
+extern char		*baseDirectory;
+extern int		port;
 
 
 //--	----	----	----	----	----	----	----
@@ -275,6 +283,7 @@ void *webService( void *arg ) {
 			break;
 		}
 	}
+
 	if ( fileType != 0 ) {				// Found extent type that we support
 		// investigate file name, handle it
 		char filePath[256];
@@ -301,12 +310,12 @@ void *webService( void *arg ) {
 			}
 			close( file_fd );
 //			printf( "  done replying for file URI: %s\n\n", filePath );
-		} else {													// open the file for reading
+		} else {													// could not find or open the file
 			// Hidden command check here - file with recognized type not found
 			doParseWebURI( socketfd, &buffer[5] );
 //			printf( "  done replying for file as command: %s\n\n", command );
 		}
-	} else {
+	} else {														// could not recognize the file type
 		// Hidden command check here - unrecognized file name ending
 		doParseWebURI( socketfd, &buffer[5] );
 //		printf( "  done replying to command: %s\n\n", command );
@@ -315,6 +324,65 @@ void *webService( void *arg ) {
 	close( socketfd );
 	free( webData );
 	pthread_exit( NULL );
+	return NULL;
+}
+
+
+// this routine monitors the web server port
+//   and spawns a thread to handle any requests that are received
+void *monitorWebOps( void *arg ) {
+	int listenfd, requestfd, bound;
+	size_t length;
+	static struct sockaddr_in reply_socketaddr;		// receive socket address from accept routine
+	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
+
+	// setup the network socket
+	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
+		nlog( ERROR, "creating new socket", "failed", 80 );
+
+	listen_socketaddr.sin_family = AF_INET;
+	listen_socketaddr.sin_addr.s_addr = htonl( INADDR_ANY );
+	listen_socketaddr.sin_port = htons( port );
+
+	bound = bind( listenfd, (struct sockaddr *)&listen_socketaddr, sizeof(listen_socketaddr)); // permission error
+	if ( bound < 0 )
+		nlog( ERROR, "binding to socket", "failed", 81 );
+
+	if ( listen( listenfd, 64 ) < 0 )
+		nlog( ERROR, "creating listener socket", "failed", 82 );
+
+	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+
+	pthread_t pThread;	// this is our thread identifier
+    pthread_attr_t attr;
+    int s = pthread_attr_init( &attr );
+    if (s != 0)
+		nlog( ERROR, "pthread_attr_init", "failed", 83 );
+
+    pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
+
+    int loopCount = 0;
+	while ( running ) {
+		length = sizeof( reply_socketaddr );
+		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 ) {
+			nlog( ERROR, "accepting request on listener", "failed", 90 );
+		}
+
+		web_data *webData = malloc( sizeof( web_data ) );
+		if ( webData ) {
+			webData->socketfd = requestfd;
+			webData->baseDirectory = baseDirectory;
+
+			int result = pthread_create( &pThread, &attr, webService, webData );
+			if ( 0 != result ) {
+				nlog( ERROR, "creating a thread to handle new request", "failed", 91 );
+			}
+		} else {
+			nlog( ERROR, "allocating web_data struct for request", "failed", 92 );
+		}
+		loopCount++;
+	}
+	printf( "\n  Web server loop ended after receiving %d requests\n", loopCount );
 	return NULL;
 }
 

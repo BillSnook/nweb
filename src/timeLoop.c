@@ -23,7 +23,7 @@
 #include "../utilities/nwInterface.h"
 
 extern	mraa_gpio_context gpio;
-//extern	mraa_gpio_context isro;
+extern	mraa_gpio_context isro;
 //extern	mraa_pwm_context  pwmo;
 
 extern	mraa_aio_context	vDet;

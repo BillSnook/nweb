@@ -32,6 +32,18 @@ struct web_data {
 };
 typedef	struct web_data		web_data;
 
+
+struct server_data {
+	int			port;
+	char		*baseDirectory;
+};
+typedef	struct server_data		server_data;
+
+
+char	*baseDirectory;
+int		port;
+
+
 //--	----	----	----	----	----	----	----
 
 void nlog(int type, char *s1, char *s2, int socket_fd);
@@ -42,6 +54,7 @@ int webDirectoryCheck( char *baseDir );
 
 void doParseWebURI( int socketfd, char *commandString );
 void *webService( void *arg );
+void *monitorWebOps( void *arg );
 
 
 #endif /* SERVERTHREAD_H_ */
