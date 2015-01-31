@@ -14,6 +14,7 @@
 char	command[COMMAND_SZ];		// storage for command input string
 
 int		commandCode;				// Code for individual commands
+int		userLoopExitCode;
 
 
 void *monitorUserOps( void *arg );

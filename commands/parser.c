@@ -22,13 +22,19 @@
 #include "../utilities/nwInterface.h"
 
 #ifndef	DISABLE_IO
-extern	mraa_gpio_context gpio;
+extern	mraa_gpio_context 	gpio;
 extern	mraa_aio_context	vDet;
 extern	mraa_gpio_context	iSense;
 #endif	// DISABLE_IO
 
-extern int				running;
+extern int		running;
+extern int		showMonitor;
 //extern struct _IO_FILE *serialPort;
+
+extern int		userLoopExitCode;
+extern int		timeLoopExitCode;
+extern int		servLoopExitCode;;
+extern int		webLoopExitCode;
 
 
 
@@ -86,39 +92,31 @@ char *parseCommand( char *command ) {
 		return NULL;
 	}
 
-	if ( 0 == strcmp( "st0", command ) ) {			// Serial Test command
-		printf( "  Got st0\n" );
-		setupSer( "MFD0", B9600 );
+	if ( 0 == strcmp( "status1", command ) ) {			// Status Test command
+		printf( "  Got status1\n" );
+
+		char *statusString = malloc( 256 );
+		sprintf( statusString, "u: %d, t: %d, s: %d, w: %d", userLoopExitCode, timeLoopExitCode, servLoopExitCode, webLoopExitCode );
+
+		return statusString;
+	}
+
+	if ( 0 == strcmp( "mOff", command ) ) {			// Serial Test command
+//		printf( "  Got mOff\n" );
+		showMonitor = 0;
+		return NULL;
+	}
+
+	if ( 0 == strcmp( "mOn", command ) ) {
+//		printf( "  Got mOn\n" );
+		showMonitor = 1;
 		return NULL;
 	}
 
 	if ( 0 == strcmp( "st1", command ) ) {			// Serial Test command
-		printf( "  Got st1\n" );
-		setupSer( "MFD1", B9600 );
-		return NULL;
-	}
-
-	if ( 0 == strcmp( "st2", command ) ) {			// Serial Test command
-		printf( "  Got st2\n" );
-		setupSer( "MFD2", 9600 );
-		return NULL;
-	}
-
-	if ( 0 == strcmp( "st3", command ) ) {			// Serial Test command
-		printf( "  Got st3\n" );
-		setupSer( "S0", B9600 );
-		return NULL;
-	}
-
-	if ( 0 == strcmp( "st4", command ) ) {			// Serial Test command
-		printf( "  Got st4\n" );
-		setupSer( "S1", B9600 );
-		return NULL;
-	}
-
-	if ( 0 == strcmp( "st5", command ) ) {			// Serial Test command
-		printf( "  Got st5\n" );
-		setupSer( "S2", B9600 );
+//		printf( "  Got st1\n" );
+		setupSerial1( B9600 );
+		testRW( "Frog" );
 		return NULL;
 	}
 
@@ -178,9 +176,9 @@ FILE *fPtrIn;						// Make a separate File pointer to handle stdin...
 int  peek;							// last value we received from read/peek
 
 
-void setupSer( char *portNum02, int baud ) {
+void setupSerial1( int baud ) {
 
-	printf( "  setupSer at start\n" );
+	printf( "  setupSerial1 at start\n" );	// sets up uart1, connected to Arduino BB pins 0 & 1
 
 	serialFDOut = -1;                                  // Say that it is not open...
 	serialFDIn = -1;
@@ -189,8 +187,7 @@ void setupSer( char *portNum02, int baud ) {
     peek = -1;
 
 	// Try to open File Descriptor
-	char devPort[] = "/dev/tty12345678";
-	sprintf( devPort, "/dev/tty%s", portNum02 );
+	char devPort[] = "/dev/ttyMFD1";
 	printf( "  Serial port prepare to open %s\n", devPort );
 
 //	int serialFDOut = open( devPort, O_RDWR| O_NONBLOCK | O_NDELAY );
@@ -205,6 +202,7 @@ void setupSer( char *portNum02, int baud ) {
 
     if ( ( fPtrOut = fdopen( serialFDOut, "r+" ) ) == NULL ) {
 		printf( "  Error opening file associated with %s: %d, %s\n", devPort, errno, strerror( errno ) );
+		close( serialFDOut );
         return;
     }
 	printf( "  Serial port access file %s opened successfully\n", devPort );
@@ -252,22 +250,28 @@ void setupSer( char *portNum02, int baud ) {
 	tty.c_cc[VTIME]     =   5;          // 0.5 seconds read timeout
 
 	// Set Baud Rate
-	if ( cfsetspeed (&tty, baud ) != 0) {
-		printf( "  Error from cfsetspeed: %d, %s\n", errno, strerror (errno) );
+	if ( 0 != baud ) {
+		if ( cfsetspeed (&tty, baud ) != 0) {
+			printf( "  Error from cfsetspeed: %d, %s\n", errno, strerror (errno) );
+			return;
+		}
 	}
 
 	// Flush Port, then applies attributes
 	if ( tcflush( serialFDOut, TCIFLUSH ) != 0) {
 		printf( "  Error from tcflush: %d, %s\n", errno, strerror (errno) );
+		return;
 	}
 
 	if ( tcsetattr ( serialFDOut, TCSAFLUSH, &tty ) != 0) {
 		printf( "  Error from tcsetattr: %d, %s\n", errno, strerror (errno) );
+		return;
 	}
 
     // enable input & output transmission
     if ( tcflow(serialFDOut, TCOON | TCION) != 0) {
 		printf( "  Error from tcflow: %d, %s\n", errno, strerror (errno) );
+		return;
 	}
 
     // purge buffer
@@ -281,17 +285,25 @@ void setupSer( char *portNum02, int baud ) {
     }
     fcntl( serialFDOut, F_SETFL, 0 );               // disable blocking
 
+}
+
+
+//--	----	----	----
+
+
+void testRW( char *msg ) {
+
+	printf( "  Start writing\n\n" );
+
 	// WRITE
-
-	printf( "  Start\n\n" );
-
-    int i;
-    for ( i = 0; i < 10; i++ ) {
-        serWrite( '?' );		// 0x3F
-    }
-
-	printf( "  Done\n\n" );
-
+	int msgLen = strlen( msg );
+	int cnt, loop;
+	for ( loop = 0; loop < msgLen; loop++ ) {
+		cnt = fwrite( &msg[ loop ], 1, 1, fPtrOut );
+	    if ( cnt != 1 ) {
+	    	printf( "fwrite error returned %d, errno: %d, %s", cnt, errno, strerror( errno ) );
+	    }
+	}
 /*
     serWrite( 'I' );
     serWrite( 'N' );
@@ -299,6 +311,7 @@ void setupSer( char *portNum02, int baud ) {
     serWrite( 'T' );
     serWrite( '\n' );
     serWrite( '\0' );
+
     //
 	unsigned char cmd[] = {'I', 'N', 'I', 'T', ' ', '\r', '\0'};
 	int n_written = write( serialFDOut, cmd, sizeof(cmd) - 1 );
@@ -307,12 +320,22 @@ void setupSer( char *portNum02, int baud ) {
 		printf( "  Error writing, intended: %d, wrote: %d\n", sizeof(cmd) - 1, n_written );
 	}
 */
-/*
+
+	printf( "  Done writing\n\n" );
+
+    serFlush();
+
+	usleep( 1000 );
+
 	// Allocate memory for read buffer
 	char buf [256];
 	memset (&buf, '\0', sizeof buf);
-
 	//READ
+	size_t rdCnt = fread( &buf, 1, 256, fPtrIn );
+    if ( rdCnt > 0 ) {
+    	printf( "  Read: %s\n", buf );
+    }
+/*
 	int n_read = read( serialFDOut, &buf, sizeof buf );
 
 	// Error Handling
@@ -323,9 +346,12 @@ void setupSer( char *portNum02, int baud ) {
 	// Print what I read...
 	printf( "  Read: %s\n", buf );
 */
-	int cnt = serPeek();
-	printf( "  Peek: %d\n", cnt );
-
+/*
+	int next = serRead();
+	printf( "  Read: %c\n", next );
+	next = serRead();
+	printf( "  Read: %c\n", next );
+*/
 	fclose( fPtrOut );
 	close( serialFDOut );
 }

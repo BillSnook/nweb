@@ -40,8 +40,14 @@ struct server_data {
 typedef	struct server_data		server_data;
 
 
+int		servLoopExitCode;
+int		webLoopExitCode;
+
+char	*rootDirectory;
 char	*baseDirectory;
+char	*logFileName;
 int		port;
+int		running;
 
 
 //--	----	----	----	----	----	----	----

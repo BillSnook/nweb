@@ -18,42 +18,32 @@
 #include <pthread.h>
 //#include <semaphore.h>
 
-
-// If zombie/daemon, do not start thread to get user input
-// So, off for use as app, on for use as service started at startup
-//#define	BECOME_ZOMBIE
-
-
 #include "userLoop.h"
 #include "timeLoop.h"
 #include "serverThread.h"
 //#include "../commands/parser.h"
 
+// If zombie/daemon, do not start thread to get user input
+// So, off for use as app, on for use as service started at startup
+//#define	BECOME_ZOMBIE
 
 //--	----	----	----	----	----	----	----
 
-
-char			*rootDirectory;
+extern char		*rootDirectory;
 extern char		*baseDirectory;
 extern int		port;
 
-
-void monitorServiceHealth( void ) {
-
-	while (running ) {
-		sleep( 1 );
-	}
-	printf( "SystemHealth monitor exiting" );
-}
-
+pthread_t		pThreadUser;	// this is our userLoop console input handler thread identifier
+pthread_t		pThreadTime;	// this is our timeLoop timed process handler thread identifier
+pthread_t		pThreadServer;	// this is our webLoop web server request handler thread identifier
 
 //--	----	----	----	----	----	----	----
 
-
 int main(int argc, char **argv) {
+    pthread_attr_t attr;
 
 	rootDirectory = argv[0];
-	printf( "\nIn main at start, rootDirectory: %s\n", rootDirectory );
+//	printf( "\nIn main at start, rootDirectory: %s\n", rootDirectory );
 
 	if ( argc > 3 || !strcmp(argv[1], "-?") || !strcmp(argv[1], "-h") ) {
 		printWebHelp();
@@ -70,7 +60,7 @@ int main(int argc, char **argv) {
 	} else {	// Not valid arguments, use defaults
 		port = 80;
 //		baseDirectory = "/opt/ea-web/web_src";
-	    sprintf( baseDirectory, " %s/web_src", rootDirectory );
+	    sprintf( baseDirectory, "%s/web_src", rootDirectory );
 	}
 
 	if ( chdir( baseDirectory ) == -1 ) {
@@ -80,7 +70,6 @@ int main(int argc, char **argv) {
 	running = 1; 						// Enable run loop
     timeCheck = DEFAULT_LOOP_TIME;		// Interval for checking in the loop
 
-    pthread_attr_t attr;
     int s = pthread_attr_init( &attr );
     if (s != 0)
 		nlog( ERROR, "pthread_attr_init", "failed", 74 );
@@ -92,7 +81,6 @@ int main(int argc, char **argv) {
 //	if we do not become a daemon, create a thread to monitor and respond to user input
 	// we want to start a new thread to monitor and execute user command input
 	// this only makes sense if we are not a zombie/daemon
-	pthread_t pThreadUser;	// this is our thread identifier
 	int resultUser = pthread_create( &pThreadUser, &attr, monitorUserOps, "unused" );
 	if ( 0 != resultUser )
 		nlog( ERROR, "creating thread for user input", "failed", 75 );	// returns failure to shell
@@ -100,12 +88,10 @@ int main(int argc, char **argv) {
 #endif	// BECOME_ZOMBIE
 
 	// we want to start a new thread to monitor our timed processes - like 'blink'
-	pthread_t pThreadTime;	// this is our thread identifier
 	int resultTime = pthread_create( &pThreadTime, &attr, monitorTimeOps, "unused" );
 	if ( 0 != resultTime )
 		nlog( ERROR, "create thread for timed operations", "failed", 76 ); // returns failure to shell
 
-	pthread_t pThreadServer;	// this is our thread identifier
 	int resultServer = pthread_create( &pThreadServer, &attr, monitorWebOps, "unused" );
 	if ( 0 != resultServer )
 		nlog( ERROR, "create thread for web operations", "failed", 77 ); // returns failure to shell

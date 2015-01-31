@@ -25,7 +25,8 @@ struct _IO_FILE *serialPort;
 
 char *parseCommand( char *command );
 
-void setupSer( char *portNum02, int baud );
+void setupSerial1( int baud );
+void testRW( char *msg );
 int serAvailable(void);
 int serPeek( void );
 int serRead( void );

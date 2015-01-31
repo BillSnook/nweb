@@ -20,13 +20,15 @@
 #endif	// DISABLE_IO
 
 
-
-int		running;
+int		timeLoopExitCode;
 double	timeCheck;
+int		showMonitor;
 
 
 void *monitorTimeOps( void *arg );
 void sig_handler(int signo);
 
+void monitorServiceHealth( void );
+void displayServiceHealth( void );
 
 #endif /* TIMELOOP_H_ */

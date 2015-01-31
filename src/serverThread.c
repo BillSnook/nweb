@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 
 #include <pthread.h>
+#include <stdarg.h>
 
 //#include "userLoop.h"
 //#include "timeLoop.h"
@@ -52,52 +53,74 @@ struct fileMap extensions [] = {
 
 extern int		running;
 extern char		*baseDirectory;
+//extern char		*logFileName;
 extern int		port;
+extern int		servLoopExitCode;
+extern int		webLoopExitCode;
+
+int		runningWebLoop;
 
 
 //--	----	----	----	----	----	----	----
 
+void blog( const char *__restrict __format, ... ) {
 
-void nlog(int type, char *s1, char *s2, int socket_fd) {
+	va_list arglist;
+	va_start( arglist, __format );
+	vfprintf( stdout,  __format, arglist );
+//	vfprintf( stderr,  __format, arglist );
+	va_end( arglist );
+
+}
+
+void nlog(int type, char *s1, char *s2, int errorCodeOrSkt) {
 
 	int fd ;
 	char logbuffer[BUFSIZE*2];
 
 	switch (type) {
 		case ERROR:
-			sprintf(logbuffer,"ERROR: %s %s Errno=%d (%s), Err=%d, pid=%d", s1, s2, errno, strerror(errno), socket_fd, getpid() );
+			sprintf(logbuffer,"ERROR: %s %s Errno=%d (%s), Err=%d, pid=%d", s1, s2, errno, strerror(errno), errorCodeOrSkt, getpid() );
 			break;
 
 		case FORBIDDEN:
-			write(socket_fd, "HTTP/1.1 403 Forbidden\nContent-Length: 185\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\nThe requested URL, file type or operation is not allowed on this simple static file webserver.\n</body></html>\n",271);
+			write(errorCodeOrSkt, "HTTP/1.1 403 Forbidden\nContent-Length: 185\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\nThe requested URL, file type or operation is not allowed on this simple static file webserver.\n</body></html>\n",271);
 			sprintf(logbuffer,"FORBIDDEN: %s:%s",s1, s2);
 			break;
 
 		case NOTFOUND:
-			write(socket_fd, "HTTP/1.1 404 Not Found\nContent-Length: 136\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\nThe requested URL was not found on this server.\n</body></html>\n",224);
+			write(errorCodeOrSkt, "HTTP/1.1 404 Not Found\nContent-Length: 136\nConnection: close\nContent-Type: text/html\n\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\nThe requested URL was not found on this server.\n</body></html>\n",224);
 			sprintf(logbuffer,"NOT FOUND: %s:%s",s1, s2);
 			break;
 
 		case LOG:
-			sprintf(logbuffer," INFO: %s %s: %d",s1, s2, socket_fd );
+			sprintf(logbuffer," INFO: %s %s: %d",s1, s2, errorCodeOrSkt );
 			break;
 
 		default:
-			sprintf(logbuffer," Unrecognized: %s %s: %d",s1, s2, socket_fd );
+			sprintf(logbuffer," Unrecognized: %s %s: %d",s1, s2, errorCodeOrSkt );
 			break;
 	}
 
-	if ( ( fd = open( "nweb.log", O_CREAT | O_WRONLY | O_APPEND, 0644 ) ) >= 0 ) {
+	char logFN[256];
+	sprintf( logFN, "%s/nweb.log", rootDirectory );
+
+	if ( ( fd = open( logFN, O_CREAT | O_WRONLY | O_APPEND, 0644 ) ) >= 0 ) {
 		write( fd, logbuffer, strlen( logbuffer ) );
 		write( fd, "\n",  1 );
 		close( fd );
 	}
 
-	if ( type == ERROR )
-		exit( 70 );
-	if ( ( type == FORBIDDEN ) || ( type = NOTFOUND ) ) {
+	if ( type == ERROR ) {
+		running = 0;
+		sleep( 2 );
 //		pthread_exit( NULL );
+//		exit( 70 );
 	}
+
+//	if ( ( type == FORBIDDEN ) || ( type = NOTFOUND ) ) {
+//		pthread_exit( NULL );
+//	}
 
 }
 
@@ -211,6 +234,9 @@ void *webService( void *arg ) {
 	int file_fd, buflen, len;
 	char * fileType;
 
+	if ( ++webLoopExitCode > 99 )
+		webLoopExitCode = 0;
+
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;
 
@@ -218,9 +244,10 @@ void *webService( void *arg ) {
 
 	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
 //		printf( "\n  socket read failure, exit thread\n" );
-		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
 		close( socketfd );
 		free( webData );
+		webLoopExitCode = 52;
+		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
 		pthread_exit( NULL );
 		return NULL;
 	}
@@ -233,9 +260,10 @@ void *webService( void *arg ) {
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
 //		printf( "\n  non-GET request received, exit thread\n" );
-		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
 		close( socketfd );
 		free( webData );
+		webLoopExitCode = 54;
+		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
 		pthread_exit( NULL );
 		return NULL;
 	}
@@ -258,9 +286,10 @@ void *webService( void *arg ) {
 	for ( j = 4; j < i-1; j++ )					// check for illegal parent directory use ..
 		if ( ( buffer[j] == '.' ) && ( buffer[j+1] == '.' ) ) {
 //			printf( "\n  invalid .. directory entry in request, exit thread\n" );
-			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
 			close( socketfd );
 			free( webData );
+			webLoopExitCode = 56;
+			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
 			pthread_exit( NULL );
 			return NULL;
 		}
@@ -321,6 +350,8 @@ void *webService( void *arg ) {
 //		printf( "  done replying to command: %s\n\n", command );
 	}
 
+	webLoopExitCode = 50;		// Normal web service request handler exit code
+
 	close( socketfd );
 	free( webData );
 	pthread_exit( NULL );
@@ -328,44 +359,68 @@ void *webService( void *arg ) {
 }
 
 
-// this routine monitors the web server port
+// this routine monitors the web servermonOff port
 //   and spawns a thread to handle any requests that are received
 void *monitorWebOps( void *arg ) {
+    int loopCount = 0;
 	int listenfd, requestfd, bound;
 	size_t length;
 	static struct sockaddr_in reply_socketaddr;		// receive socket address from accept routine
 	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
 
+	webLoopExitCode = 0;
+	servLoopExitCode = 0;
+
 	// setup the network socket
-	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
+	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 ) {
+		servLoopExitCode = 41;
 		nlog( ERROR, "creating new socket", "failed", 80 );
+		return NULL;
+	}
 
 	listen_socketaddr.sin_family = AF_INET;
 	listen_socketaddr.sin_addr.s_addr = htonl( INADDR_ANY );
 	listen_socketaddr.sin_port = htons( port );
 
 	bound = bind( listenfd, (struct sockaddr *)&listen_socketaddr, sizeof(listen_socketaddr)); // permission error
-	if ( bound < 0 )
+	if ( bound < 0 ) {
+		servLoopExitCode = 43;
 		nlog( ERROR, "binding to socket", "failed", 81 );
+		pthread_exit( NULL );
+		return NULL;
+	}
 
-	if ( listen( listenfd, 64 ) < 0 )
+	if ( listen( listenfd, 64 ) < 0 ) {
+		servLoopExitCode = 44;
 		nlog( ERROR, "creating listener socket", "failed", 82 );
+		pthread_exit( NULL );
+		return NULL;
+	}
 
-	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+	blog( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
+//	printf( "\nStarting web server process, version %d.%d\n", VERSION, SUB_VERSION );
 
 	pthread_t pThread;	// this is our thread identifier
     pthread_attr_t attr;
     int s = pthread_attr_init( &attr );
-    if (s != 0)
+    if ( s != 0 ) {
+		servLoopExitCode = 45;
 		nlog( ERROR, "pthread_attr_init", "failed", 83 );
+		pthread_exit( NULL );
+		return NULL;
+	}
 
     pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
 
-    int loopCount = 0;
 	while ( running ) {
+		if ( ++servLoopExitCode > 99 )
+			servLoopExitCode = 0;
 		length = sizeof( reply_socketaddr );
 		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 ) {
+			servLoopExitCode = 46;
 			nlog( ERROR, "accepting request on listener", "failed", 90 );
+			pthread_exit( NULL );
+			return NULL;
 		}
 
 		web_data *webData = malloc( sizeof( web_data ) );
@@ -375,14 +430,22 @@ void *monitorWebOps( void *arg ) {
 
 			int result = pthread_create( &pThread, &attr, webService, webData );
 			if ( 0 != result ) {
+				servLoopExitCode = 47;
 				nlog( ERROR, "creating a thread to handle new request", "failed", 91 );
+				free( webData );
+				pthread_exit( NULL );
+				return NULL;
 			}
 		} else {
+			servLoopExitCode = 48;
 			nlog( ERROR, "allocating web_data struct for request", "failed", 92 );
+			pthread_exit( NULL );
+			return NULL;
 		}
 		loopCount++;
 	}
 	printf( "\n  Web server loop ended after receiving %d requests\n", loopCount );
+	servLoopExitCode = 40;
 	return NULL;
 }
 
