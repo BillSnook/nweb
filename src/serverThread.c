@@ -29,7 +29,7 @@
 // This enables our new html control protocols on top of html file display methods
 #define	NEW_CONTROLS
 
-
+// Basic simple HTTP/v1.0 header
 static char *html_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n";
 static char *html_head = "<html><head>\r\n<title>Edison Web Server</title>\r\n</head><body>\r\n";
 static char *html_foot = "\r\n</body></html\r\n>";
@@ -58,7 +58,10 @@ extern int		port;
 extern int		servLoopExitCode;
 extern int		webLoopExitCode;
 
-int		runningWebLoop;
+
+int				runningWebLoop;
+
+pthread_mutex_t	parseWebMutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 //--	----	----	----	----	----	----	----
@@ -81,6 +84,7 @@ void nlog(int type, char *s1, char *s2, int errorCodeOrSkt) {
 	switch (type) {
 		case ERROR:
 			sprintf(logbuffer,"ERROR: %s %s Errno=%d (%s), Err=%d, pid=%d", s1, s2, errno, strerror(errno), errorCodeOrSkt, getpid() );
+			printf( "ERROR: %s %s Errno=%d (%s), Err=%d, pid=%d", s1, s2, errno, strerror(errno), errorCodeOrSkt, getpid() );
 			break;
 
 		case FORBIDDEN:
@@ -182,7 +186,7 @@ void doParseWebURI( int socketfd, char *commandString ) {
 //	printf( "  received web command to parse: %s\n", commandString );
 
 	// Here we parse the command
-	char *returnData = parseCommand( commandString );
+	char *returnData = parseWebCommand( commandString );
 	// for now we are confused
 	// if data is returned we want to return it to the web client
 	// but if there is no return data, we want to signal that too
@@ -231,31 +235,31 @@ void *webService( void *arg ) {
 	char buffer[BUFSIZE+1];
 	extern char command[];	// Access latest command entered from the command line
 
-	int file_fd, buflen, len;
+	int buflen, len;
 	char * fileType;
 
 	if ( ++webLoopExitCode > 99 )
 		webLoopExitCode = 0;
 
 	web_data *webData = arg;					// get pointer to web params to local struct
-	int socketfd = webData->socketfd;
+	int socketfd = webData->socketfd;			// receive socket with data
 
 	ret = read( socketfd, buffer, BUFSIZE );	// read Web request in one go
 
-	if ( ret == 0 || ret == -1 ) {     			// read failure stop now
+	if ( ret <= 0 ) {     						// if read failure then reply and exit thread
 //		printf( "\n  socket read failure, exit thread\n" );
 		close( socketfd );
 		free( webData );
 		webLoopExitCode = 52;
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
-		pthread_exit( NULL );
+//		pthread_exit( NULL );
 		return NULL;
 	}
 
 	if ( ( ret > 0 ) && ( ret < BUFSIZE ) )		// return code is valid chars
 		buffer[ret] = 0;          				// terminate the buffer - make it a valid c-string
 	else
-		buffer[0] = 0;
+		buffer[0] = 0;							// else default to empty string
 
 	// Kind of cleaned up header received, validate type
 	if ( strncmp( buffer, "GET ", 4 ) && strncmp( buffer, "get ", 4 ) ) {	// Verify GET operation
@@ -264,11 +268,11 @@ void *webService( void *arg ) {
 		free( webData );
 		webLoopExitCode = 54;
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
-		pthread_exit( NULL );
+//		pthread_exit( NULL );
 		return NULL;
 	}
 
-	// Command parsed
+	// Command parsed, cleanup GET string
 	for ( i = 0; i < ret; i++ )      			// remove CF and LF characters
 		if ( ( buffer[i] == '\r' ) || ( buffer[i] == '\n' ) )
 			buffer[i] = '*';
@@ -279,7 +283,7 @@ void *webService( void *arg ) {
 			buffer[i] = 0;
 			break;
 		}
-	}
+	}		// leave with i set to the length of URI string
 
 //	printf( "  got GET request: %s\n", &buffer[4] );
 
@@ -290,21 +294,21 @@ void *webService( void *arg ) {
 			free( webData );
 			webLoopExitCode = 56;
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
-			pthread_exit( NULL );
+//			pthread_exit( NULL );
 			return NULL;
 		}
 
 //	Get the uri from the GET message
 
 	if ( !strncmp( &buffer[0], "GET /\0", 6 ) || !strncmp( &buffer[0], "get /\0", 6 ) ) {	// check for missing uri
-//		strcpy( buffer, "GET /moosetrap" );										// default to default null command??
 		strcpy( buffer, "GET /index.html" );										// default to index file??
 	}
 
-	// work out the file type and check we support it
+	// extract the file type and check we support it
 	buflen = (int)strlen( buffer );
 	fileType = (char *)0;
 
+	// compare against list of extensions we support
 	for ( i = 0; extensions[i].ext != 0; i++ ) {
 		len = (int)strlen( extensions[i].ext );
 		if ( !strncmp( &buffer[buflen-len], extensions[i].ext, len ) ) {
@@ -313,8 +317,9 @@ void *webService( void *arg ) {
 		}
 	}
 
-	if ( fileType != 0 ) {				// Found extent type that we support
-		// investigate file name, handle it
+	if ( fileType != 0 ) {				// Found extent type that we support - if found open, get contents, prepend http header and reply
+		int file_fd;
+		// investigate file name, open it and send it as a response
 		char filePath[256];
 		sprintf( filePath, "%s/%s", webData->baseDirectory, &buffer[5]);
 //		printf( "  got filePath: %s\n", filePath );
@@ -339,14 +344,18 @@ void *webService( void *arg ) {
 			}
 			close( file_fd );
 //			printf( "  done replying for file URI: %s\n\n", filePath );
-		} else {													// could not find or open the file
+		} else {													// could not find or open the file - assume it is a command
 			// Hidden command check here - file with recognized type not found
+            pthread_mutex_lock( &parseWebMutex );
 			doParseWebURI( socketfd, &buffer[5] );
+            pthread_mutex_unlock( &parseWebMutex );
 //			printf( "  done replying for file as command: %s\n\n", command );
 		}
-	} else {														// could not recognize the file type
+	} else {														// could not recognize the file type - assume it is a command
 		// Hidden command check here - unrecognized file name ending
+        pthread_mutex_lock( &parseWebMutex );
 		doParseWebURI( socketfd, &buffer[5] );
+        pthread_mutex_unlock( &parseWebMutex );
 //		printf( "  done replying to command: %s\n\n", command );
 	}
 
@@ -359,10 +368,9 @@ void *webService( void *arg ) {
 }
 
 
-// this routine monitors the web servermonOff port
-//   and spawns a thread to handle any requests that are received
+// this routine is created as it's own thread and monitors the web server port
+//   and spawns a webService thread to handle each request that is received
 void *monitorWebOps( void *arg ) {
-    int loopCount = 0;
 	int listenfd, requestfd, bound;
 	size_t length;
 	static struct sockaddr_in reply_socketaddr;		// receive socket address from accept routine
@@ -415,6 +423,7 @@ void *monitorWebOps( void *arg ) {
 	while ( running ) {
 		if ( ++servLoopExitCode > 99 )
 			servLoopExitCode = 0;
+
 		length = sizeof( reply_socketaddr );
 		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 ) {
 			servLoopExitCode = 46;
@@ -442,10 +451,10 @@ void *monitorWebOps( void *arg ) {
 			pthread_exit( NULL );
 			return NULL;
 		}
-		loopCount++;
 	}
-	printf( "\n  Web server loop ended after receiving %d requests\n", loopCount );
-	servLoopExitCode = 40;
+	printf( "\n  Web server loop ended\n" );
+	servLoopExitCode = -1;
+	pthread_attr_destroy( &attr );
 	return NULL;
 }
 

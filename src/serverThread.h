@@ -13,7 +13,7 @@
 #define	SUB_VERSION	20
 
 
-#define BUFSIZE		8096
+#define BUFSIZE		1024
 #define ERROR		42
 #define LOG			44
 #define FORBIDDEN	403

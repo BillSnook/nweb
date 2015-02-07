@@ -46,7 +46,7 @@ void *monitorUserOps( void *arg ) {
 				memmove( command, cmd, strlen( cmd ) - 1 );
 				command[ strlen( cmd ) - 1 ] = 0;	// replace newline with end of string null (0)
 //				printf( "received user command to parse: %s\n", command );
-				char *response = parseCommand( command );
+				char *response = parseUserCommand( command );
 				if ( NULL != response ) {
 					printf( ">>  response: %s\n", response );
 					free( response );

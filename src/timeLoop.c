@@ -13,6 +13,8 @@
 #include <string.h>
 #include <signal.h>
 
+#include <termios.h>    // POSIX terminal control definitions
+
 #include "timeLoop.h"
 //#include "../commands/parser.h"
 #include "../utilities/nwTime.h"
@@ -31,7 +33,6 @@ extern	mraa_gpio_context	iSense;
 
 //mraa_gpio_context uartRx;
 //mraa_gpio_context uartTx;
-mraa_uart_context uart1;
 
 #endif	// DISABLE_IO
 
@@ -68,10 +69,7 @@ void *monitorTimeOps( void *arg ) {
 //    isro = setupISRO( 12, &isrProc );
 //    pwmo = setupPWMO( 3 );
 
-//    uartRx = setupGPIOIn( 0 );
-//    uartTx = setupGPIOOut( 1 );
-
-    uart1 = mraa_uart_init( 1 );
+//    setupSerial1( B9600 );
 
 #endif	// DISABLE_IO
 
@@ -109,6 +107,7 @@ void *monitorTimeOps( void *arg ) {
     closeGPIO( iSense );
     closeGPIO( gpio );
 
+//    closeSerial1();
     closeMRAA();
 #endif	// DISABLE_IO
 
