@@ -40,6 +40,7 @@ pthread_t		pThreadServer;	// this is our webLoop web server request handler thre
 //--	----	----	----	----	----	----	----
 
 int main(int argc, char **argv) {
+
     pthread_attr_t attr;
 
 	rootDirectory = argv[0];
@@ -59,8 +60,8 @@ int main(int argc, char **argv) {
 			nlog( ERROR, "Invalid port number (range 1..60000):", argv[1], 72 );
 	} else {	// Not valid arguments, use defaults
 		port = 80;
-//		baseDirectory = "/opt/ea-web/web_src";
-	    sprintf( baseDirectory, "%s/web_src", rootDirectory );
+//		baseDirectory = "/opt/ea-web/www";
+	    sprintf( baseDirectory, "%s/www", rootDirectory );
 	}
 
 	if ( chdir( baseDirectory ) == -1 ) {

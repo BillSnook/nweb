@@ -157,9 +157,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.1813642763" name="nwSerial.cpp" rcbsApplicability="disable" resourcePath="utilities/nwSerial.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184.719049456">
-						<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184.719049456" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1189676184"/>
-					</fileInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.197806103" name="index.html" rcbsApplicability="disable" resourcePath="src/web_src/index.html" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.705091800.1400259268.1763999438" name="nweb.js" rcbsApplicability="disable" resourcePath="src/web_src/nweb.js" toolsToInvoke="">
 						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1450623121" name="Resource Custom Build Step">

@@ -10,33 +10,49 @@
 //#include <stdlib.h>
 //#include <unistd.h>
 
-#include <time.h>
+//#include <time.h>
+#include <sys/time.h>
 
 #include "nwTime.h"
 
 
-double start = 0.0;
+long int start = 0;
+
+long int xclock() {
+
+    struct timeval localTime;
+    gettimeofday( &localTime, NULL );	// Time zone struct is obsolete, hence NULL
+
+//    printf("The current time in microseconds %ld\n", localTime.tv_usec);
+
+    return( localTime.tv_usec );
+}
 
 
 void startElapsedTime() {
 
-	start = clock();
+	start = xclock();
 //    printf( "\nStart time %ld\n", start );
 
 }
 
 
-double getElapsedTime() {
+long int getElapsedTime() {
 
-	double end = clock();
-//	printf( "End time %ld\nElapsed time %f\n", end, ( ((double) (end - start)) / CLOCKS_PER_SEC ));
-	return( ((double) (end - start)) / CLOCKS_PER_SEC );
+	long int end = xclock();
+//	printf( "End time %02f\n", end );
+//	printf( "Elapsed time %f\n", ( ((double) (end - start)) / CLOCKS_PER_SEC ));
+	end -= start;
+	if ( end < 0 )
+		end += 1000000;
+
+	return( end );
 }
 
 
-double getTimeCheck() {
+long int getTimeCheck() {
 
-	return( clock() );
+	return( xclock() );
 }
 
 // End of nwTime.c

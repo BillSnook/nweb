@@ -37,7 +37,7 @@ extern	mraa_gpio_context	iSense;
 #endif	// DISABLE_IO
 
 
-extern double	timeCheck;
+extern long int	timeCheck;
 extern int		running;
 extern int		showMonitor;
 
@@ -51,8 +51,6 @@ extern int		webLoopExitCode;
 void *monitorTimeOps( void *arg ) {
 
 	timeLoopExitCode = 0;
-//	char *msg = arg;
-//	printf( msg );
 
     signal(SIGINT, sig_handler);
 
@@ -75,14 +73,18 @@ void *monitorTimeOps( void *arg ) {
 
     showMonitor = 0;	// off for now
 
-	printf( "Starting real-time timed action control, ready to start loop, running: %d, timeCheck: %f\n", running, timeCheck );
+	printf( "Starting real-time timed action control, ready to start loop, running: %d, timeCheck: %ld\n", running, timeCheck );
 
-//	startElapsedTime();
+	startElapsedTime();
+//	int loopCount = 0;
     while ( running ) {
 		if ( ++timeLoopExitCode > 99 )
 			timeLoopExitCode = 0;
-//    	if ( getElapsedTime() > timeCheck ) {
-//    		startElapsedTime();
+
+    	if ( getElapsedTime() > timeCheck ) {
+    		startElapsedTime();
+//		if ( ++loopCount > 99 ) {	// 100 mSec, 1/10 second
+//			loopCount = 0;
 
 #ifdef	DISABLE_IO
         	printf( "\n    Tick\n" );
@@ -94,8 +96,12 @@ void *monitorTimeOps( void *arg ) {
 
 #endif	// DISABLE_IO
 
-//    	}
-    	usleep( 100000 );
+    	}
+//      usleep( 10000 );		// 10 mSec pause --		< 1% CPU usage
+		usleep( 10 );			// 100 uSec pause --	~ 12% CPU usage,
+//		usleep( 100 );			// 100 uSec pause --	~ 5-6% CPU usage
+//		usleep( 1000 );			// 1 mSec pause --		~ 1% CPU usage w/just togglePin
+        						// gives us potential 1 mSec resolution for operations
     }
 
 #ifndef	DISABLE_IO

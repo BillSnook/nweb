@@ -261,13 +261,13 @@ void closeISRO( mraa_gpio_context isro ) {
 void isr1( void *arg ) {
 
 //	mraa_gpio_context isro = (mraa_gpio_context)arg;
-	double thisTime = getTimeCheck();
+///	double thisTime = getTimeCheck();
 //	double diff = ((double) (thisTime - lastTime) * 2);
 
 //	int readInput =  mraa_gpio_read( isro );
 
 //	printf( "Interrupt1, state: %d, diff: %.2f uSec\n", readInput, diff );
-	lastTime = thisTime;
+///	lastTime = thisTime;
 }
 
 
@@ -276,7 +276,7 @@ void isr1( void *arg ) {
 
 // Serial 1 port setup
 void setupSerial1( int baud ) {
-
+/* */
 	mraa_uart_context uart1 = mraa_uart_init( 0 );
 	char *devPort = mraa_uart_get_dev_path( uart1 ); // "/dev/ttyMFD1"; // mraa_uart_get_dev_path( uart1 );
 
@@ -385,7 +385,7 @@ void setupSerial1( int baud ) {
         } while ( n > 0 );
     }
     fcntl( serialFDOut, F_SETFL, 0 );               // disable blocking
-
+/**/
 }
 
 

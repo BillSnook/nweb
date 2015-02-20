@@ -11,18 +11,18 @@
 
 #ifdef	DISABLE_IO
 
-#define	DEFAULT_LOOP_TIME	10.0
+#define	DEFAULT_LOOP_TIME	500000
 
 #else	// DISABLE_IO
 
-#define	DEFAULT_LOOP_TIME	0.5
+#define	DEFAULT_LOOP_TIME	100000
 
 #endif	// DISABLE_IO
 
 
-int		timeLoopExitCode;
-double	timeCheck;
-int		showMonitor;
+int			timeLoopExitCode;
+long int	timeCheck;
+int			showMonitor;
 
 
 void *monitorTimeOps( void *arg );
