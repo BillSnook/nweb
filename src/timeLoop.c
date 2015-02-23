@@ -98,7 +98,7 @@ void *monitorTimeOps( void *arg ) {
 
     	}
 //      usleep( 10000 );		// 10 mSec pause --		< 1% CPU usage
-		usleep( 10 );			// 100 uSec pause --	~ 12% CPU usage,
+		usleep( 10 );			// 10 uSec pause --	~ 12% CPU usage,
 //		usleep( 100 );			// 100 uSec pause --	~ 5-6% CPU usage
 //		usleep( 1000 );			// 1 mSec pause --		~ 1% CPU usage w/just togglePin
         						// gives us potential 1 mSec resolution for operations
