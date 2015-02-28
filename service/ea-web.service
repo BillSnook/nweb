@@ -1,0 +1,13 @@
+[Unit]
+Description=ea-web - command and control service for Edison development
+ConditionPathExists=/opt/ea-web/www
+After=network.target
+
+[Service]
+Type=simple
+# Start web/command dev tool
+ExecStart=/opt/ea-web/nweb 80 /opt/ea-web/www
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
