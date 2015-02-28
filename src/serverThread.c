@@ -376,8 +376,8 @@ void *monitorWebOps( void *arg ) {
 	static struct sockaddr_in reply_socketaddr;		// receive socket address from accept routine
 	static struct sockaddr_in listen_socketaddr;	// listen socket socket address
 
-	webLoopExitCode = 0;
-	servLoopExitCode = 0;
+	webLoopExitCode = SH_RUNNING;
+	servLoopExitCode = SH_RUNNING;
 
 	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 ) {
@@ -422,7 +422,7 @@ void *monitorWebOps( void *arg ) {
 
 	while ( running ) {
 		if ( ++servLoopExitCode > 99 )
-			servLoopExitCode = 0;
+			servLoopExitCode = SH_RUNNING;
 
 		length = sizeof( reply_socketaddr );
 		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 ) {
@@ -453,7 +453,7 @@ void *monitorWebOps( void *arg ) {
 		}
 	}
 	printf( "\n  Web server loop ended\n" );
-	servLoopExitCode = -1;
+	servLoopExitCode = SH_NORMAL_EXIT;
 	pthread_attr_destroy( &attr );
 	return NULL;
 }

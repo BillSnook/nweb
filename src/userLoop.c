@@ -22,7 +22,7 @@ extern int		userLoopExitCode;
 // ToDo: spawn thread to parse command to achieve better performance
 void *monitorUserOps( void *arg ) {
 
-	userLoopExitCode = 0;
+	userLoopExitCode = SH_RUNNING;
 
 	printf( "Starting user command input\n" );
 //	char *msg = arg;
@@ -36,7 +36,7 @@ void *monitorUserOps( void *arg ) {
 		ssize_t gotCount;
 		while ( running ) {
 			if ( ++userLoopExitCode > 99 )
-				userLoopExitCode = 0;
+				userLoopExitCode = SH_RUNNING;
 //			printf( "\nCommand: " );
 //			int scanSize = scanf( "%s\n", command );
 			gotCount = getline( &cmd, &sz, stdin );	// includes newline and terminating NULL
@@ -60,7 +60,7 @@ void *monitorUserOps( void *arg ) {
 			}
 		}
 		free( cmd );
-		userLoopExitCode = 20;
+		userLoopExitCode = SH_NORMAL_EXIT;
 	} else {
 		printf( "Error allocating memory for input command buffer, 256 bytes" );
 	}

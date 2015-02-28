@@ -15,7 +15,7 @@
 
 #include "nwInterface.h"
 #include "nwTime.h"
-#include "../commands/parser.h"
+//#include "../commands/parser.h"
 
 #ifndef	DISABLE_IO
 

@@ -16,7 +16,7 @@
 #include <termios.h>    // POSIX terminal control definitions
 
 #include "timeLoop.h"
-//#include "../commands/parser.h"
+#include "../commands/parser.h"
 #include "../utilities/nwTime.h"
 
 
@@ -50,7 +50,7 @@ extern int		webLoopExitCode;
 
 void *monitorTimeOps( void *arg ) {
 
-	timeLoopExitCode = 0;
+	timeLoopExitCode = SH_RUNNING;
 
     signal(SIGINT, sig_handler);
 
@@ -79,7 +79,7 @@ void *monitorTimeOps( void *arg ) {
 //	int loopCount = 0;
     while ( running ) {
 		if ( ++timeLoopExitCode > 99 )
-			timeLoopExitCode = 0;
+			timeLoopExitCode = SH_RUNNING;
 
     	if ( getElapsedTime() > timeCheck ) {
     		startElapsedTime();
@@ -118,7 +118,7 @@ void *monitorTimeOps( void *arg ) {
 #endif	// DISABLE_IO
 
 //	exit( 1 );						// Exit program when told to quit via cntl-C or by command
-    timeLoopExitCode = 30;
+    timeLoopExitCode = SH_NORMAL_EXIT;
 
 	return NULL;
 }
