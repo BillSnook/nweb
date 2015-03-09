@@ -239,7 +239,7 @@ void *webService( void *arg ) {
 	char * fileType;
 
 	if ( ++webLoopExitCode > 99 )
-		webLoopExitCode = 0;
+		webLoopExitCode = SH_RUNNING;
 
 	web_data *webData = arg;					// get pointer to web params to local struct
 	int socketfd = webData->socketfd;			// receive socket with data
@@ -250,7 +250,7 @@ void *webService( void *arg ) {
 //		printf( "\n  socket read failure, exit thread\n" );
 		close( socketfd );
 		free( webData );
-		webLoopExitCode = 52;
+		webLoopExitCode = SH_ERROR_WEB_READ;
 		nlog( FORBIDDEN, "failed to read browser request","", socketfd );
 //		pthread_exit( NULL );
 		return NULL;
@@ -266,7 +266,7 @@ void *webService( void *arg ) {
 //		printf( "\n  non-GET request received, exit thread\n" );
 		close( socketfd );
 		free( webData );
-		webLoopExitCode = 54;
+		webLoopExitCode = SH_ERROR_WEB_PARSE;
 		nlog( FORBIDDEN, "Only simple GET operation supported", buffer, socketfd );
 //		pthread_exit( NULL );
 		return NULL;
@@ -292,7 +292,7 @@ void *webService( void *arg ) {
 //			printf( "\n  invalid .. directory entry in request, exit thread\n" );
 			close( socketfd );
 			free( webData );
-			webLoopExitCode = 56;
+			webLoopExitCode = SH_ERROR_WEB_INVALID_DIRECTORY;
 			nlog( FORBIDDEN, "Parent directory (..) path names not supported", buffer, socketfd );
 //			pthread_exit( NULL );
 			return NULL;
@@ -359,7 +359,7 @@ void *webService( void *arg ) {
 //		printf( "  done replying to command: %s\n\n", command );
 	}
 
-	webLoopExitCode = 50;		// Normal web service request handler exit code
+	webLoopExitCode = SH_NORMAL_EXIT;		// Normal web service request handler exit code
 
 	close( socketfd );
 	free( webData );
@@ -381,8 +381,8 @@ void *monitorWebOps( void *arg ) {
 
 	// setup the network socket
 	if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 ) {
-		servLoopExitCode = 41;
-		nlog( ERROR, "creating new socket", "failed", 80 );
+		servLoopExitCode = SH_ERROR_SOCKET_CREATE;
+		nlog( ERROR, "creating new socket", "failed", SH_ERROR_SOCKET_CREATE);
 		return NULL;
 	}
 
@@ -392,15 +392,15 @@ void *monitorWebOps( void *arg ) {
 
 	bound = bind( listenfd, (struct sockaddr *)&listen_socketaddr, sizeof(listen_socketaddr)); // permission error
 	if ( bound < 0 ) {
-		servLoopExitCode = 43;
-		nlog( ERROR, "binding to socket", "failed", 81 );
+		servLoopExitCode = SH_ERROR_SOCKET_BIND;
+		nlog( ERROR, "binding to socket", "failed", SH_ERROR_SOCKET_BIND );
 		pthread_exit( NULL );
 		return NULL;
 	}
 
 	if ( listen( listenfd, 64 ) < 0 ) {
-		servLoopExitCode = 44;
-		nlog( ERROR, "creating listener socket", "failed", 82 );
+		servLoopExitCode = SH_ERROR_SOCKET_LISTEN;
+		nlog( ERROR, "creating listener socket", "failed", SH_ERROR_SOCKET_LISTEN );
 		pthread_exit( NULL );
 		return NULL;
 	}
@@ -412,8 +412,8 @@ void *monitorWebOps( void *arg ) {
     pthread_attr_t attr;
     int s = pthread_attr_init( &attr );
     if ( s != 0 ) {
-		servLoopExitCode = 45;
-		nlog( ERROR, "pthread_attr_init", "failed", 83 );
+		servLoopExitCode = SH_ERROR_SOCKET_ATTR;
+		nlog( ERROR, "pthread_attr_init", "failed", SH_ERROR_SOCKET_ATTR );
 		pthread_exit( NULL );
 		return NULL;
 	}
@@ -426,8 +426,8 @@ void *monitorWebOps( void *arg ) {
 
 		length = sizeof( reply_socketaddr );
 		if ( ( requestfd = accept( listenfd, (struct sockaddr *)&reply_socketaddr, &length) ) < 0 ) {
-			servLoopExitCode = 46;
-			nlog( ERROR, "accepting request on listener", "failed", 90 );
+			servLoopExitCode = SH_ERROR_SOCKET_ACCEPT;
+			nlog( ERROR, "accepting request on listener", "failed", SH_ERROR_SOCKET_ACCEPT );
 			pthread_exit( NULL );
 			return NULL;
 		}
@@ -439,15 +439,15 @@ void *monitorWebOps( void *arg ) {
 
 			int result = pthread_create( &pThread, &attr, webService, webData );
 			if ( 0 != result ) {
-				servLoopExitCode = 47;
-				nlog( ERROR, "creating a thread to handle new request", "failed", 91 );
+				servLoopExitCode = SH_ERROR_PTHREAD_CREATE;
+				nlog( ERROR, "creating a thread to handle new request", "failed", SH_ERROR_PTHREAD_CREATE );
 				free( webData );
 				pthread_exit( NULL );
 				return NULL;
 			}
 		} else {
-			servLoopExitCode = 48;
-			nlog( ERROR, "allocating web_data struct for request", "failed", 92 );
+			servLoopExitCode = SH_ERROR_WEBDATA_MEMORY;
+			nlog( ERROR, "allocating web_data struct for request", "failed", SH_ERROR_WEBDATA_MEMORY );
 			pthread_exit( NULL );
 			return NULL;
 		}

@@ -8,6 +8,8 @@ Type=simple
 # Start web/command dev tool
 ExecStart=/opt/ea-web/nweb 80 /opt/ea-web/www
 Restart=on-failure
+# Restart=always
+RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target

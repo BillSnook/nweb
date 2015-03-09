@@ -63,6 +63,7 @@ void *monitorUserOps( void *arg ) {
 		userLoopExitCode = SH_NORMAL_EXIT;
 	} else {
 		printf( "Error allocating memory for input command buffer, 256 bytes" );
+		userLoopExitCode = SH_ERROR_COMMAND_MEMORY;
 	}
 
 	return NULL;
