@@ -6,7 +6,7 @@
  */
 
 
-#include "systemMonitor.h"
+#include "systemMonitor.hpp"
 
 using namespace std;
 
@@ -79,6 +79,4 @@ int UdpClient::writeData(const stringstream &data) {
   write(sfd, data.str().c_str(), data.str().length());
   	  return 0;
 }
-
-
 

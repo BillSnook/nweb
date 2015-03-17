@@ -28,6 +28,9 @@
 #define FW               0xff
 #define BW               0x00
 
+#ifdef __cplusplus
+extern "C"  {
+#endif
 
 mraa_gpio_context	gpio;
 mraa_gpio_context	isro;
@@ -89,6 +92,9 @@ void closeSerial1( void );
 
 void closeMRAA( void );
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	// DISABLE_IO
 
