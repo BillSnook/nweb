@@ -76,7 +76,7 @@ void blog( const char *__restrict __format, ... ) {
 
 }
 
-void nlog(int type, char *s1, char *s2, int errorCodeOrSkt) {
+void nlog(int type, char const *s1, char const *s2, int errorCodeOrSkt) {
 
 	int fd ;
 	char logbuffer[BUFSIZE*2];

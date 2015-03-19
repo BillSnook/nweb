@@ -77,19 +77,19 @@ int main(int argc, char **argv) {
 
 	// we want to start a new thread to monitor and execute user input command
     // we should only do this if we are not running as a system service - how to detect this?
-	int resultUser = pthread_create( &pThreadUser, &attr, monitorUserOps, "unused" );
+	int resultUser = pthread_create( &pThreadUser, &attr, monitorUserOps, NULL );
 	if ( 0 != resultUser )
 		nlog( ERROR, "creating thread for user input", "failed", SH_ERROR_PTHREAD_CREATE_USER );	// returns failure to shell
 
 
 	// we want to start a new thread to monitor our timed processes - like 'blink'
-	int resultTime = pthread_create( &pThreadTime, &attr, monitorTimeOps, "unused" );
+	int resultTime = pthread_create( &pThreadTime, &attr, monitorTimeOps, NULL );
 	if ( 0 != resultTime )
 		nlog( ERROR, "create thread for timed operations", "failed", SH_ERROR_PTHREAD_CREATE_TIME ); // returns failure to shell
 
 
 	// we want start a thread to monitor a web socket to handle web requests to an http server
-	int resultServer = pthread_create( &pThreadServer, &attr, monitorWebOps, "unused" );
+	int resultServer = pthread_create( &pThreadServer, &attr, monitorWebOps, NULL );
 	if ( 0 != resultServer )
 		nlog( ERROR, "create thread for web operations", "failed", SH_ERROR_PTHREAD_CREATE_WEB ); // returns failure to shell
 

@@ -20,6 +20,11 @@
 #endif	// DISABLE_IO
 
 
+#ifdef __cplusplus
+extern "C"  {
+#endif
+
+
 int			timeLoopExitCode;
 long int	timeCheck;
 int			showMonitor;
@@ -30,5 +35,11 @@ void sig_handler(int signo);
 
 void monitorServiceHealth( void );
 void displayServiceHealth( void );
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* TIMELOOP_H_ */

@@ -20,6 +20,11 @@
 #define NOTFOUND	404
 
 
+#ifdef __cplusplus
+extern "C"  {
+#endif
+
+
 struct fileMap {
 	char *ext;
 	char *filetype;
@@ -52,7 +57,7 @@ int		running;
 
 //--	----	----	----	----	----	----	----
 
-void nlog(int type, char *s1, char *s2, int socket_fd);
+void nlog(int type, char const *s1, char const *s2, int socket_fd);
 
 void printWebHelp();
 
@@ -61,6 +66,11 @@ int webDirectoryCheck( char *baseDir );
 void doParseWebURI( int socketfd, char *commandString );
 void *webService( void *arg );
 void *monitorWebOps( void *arg );
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* SERVERTHREAD_H_ */
